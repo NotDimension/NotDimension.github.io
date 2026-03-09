@@ -16,7 +16,10 @@ const Index = () => {
 
   return (
     <>
-      <IntroAnimation onComplete={handleIntroComplete} />
+      {/* Show IntroAnimation until it completes */}
+      {!introComplete && <IntroAnimation onComplete={handleIntroComplete} />}
+
+      {/* Main content fades in after intro */}
       {introComplete && (
         <motion.div
           className="relative noise-overlay"

@@ -18,6 +18,7 @@ const archivedProjects = [
   { name: "SteakySMP", role: "Co‑Owner", members: "1.5k", icon: "/images/icons/steaky.png", note: "Left in October 2025" },
   { name: "ShatterMC", role: "Senior Admin", members: "260", icon: "/images/icons/shatter.png", note: "Left in November 2025" },
   { name: "BonkMC", role: "Moderator", members: "4.6k", icon: "/images/icons/bonk.png", note: "Left in December 2025" },
+  { name: "SMPFinder", role: "Senior Moderator", members: "40k", icon: "/images/icons/smpfinder.png", note: "Left in December 2025" },
   { name: "Nebular SMP", role: "Co-Owner", members: "200", icon: "/images/icons/nebular.png", note: "Left in October 2025" },
 ];
 

@@ -4,16 +4,20 @@ import RolesSection from "@/components/RolesSection";
 import SkillsSection from "@/components/SkillsSection";
 import LearningSection from "@/components/LearningSection";
 import ConnectSection from "@/components/ConnectSection";
+import ExploreSection from "@/components/ExploreSection";
 
 const Index = () => {
   return (
     <div className="relative noise-overlay">
-      <HeroSection />
-      <AboutSection />
-      <RolesSection />
-      <SkillsSection />
-      <LearningSection />
-      <ConnectSection />
+      <div className="relative z-10">
+        <HeroSection />
+        <AboutSection />
+        <RolesSection />
+        <SkillsSection />
+        <LearningSection />
+        <ExploreSection />
+        <ConnectSection />
+      </div>
     </div>
   );
 };

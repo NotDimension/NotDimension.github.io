@@ -29,8 +29,8 @@ const AboutSection = () => {
           <div className="grid grid-cols-3 gap-4 mt-10">
             {[
               { value: "9+", label: "Servers Managed" },
-              { value: "35k+", label: "Community Members" },
-              { value: "7+", label: "Months Experience" },
+              { value: "53k+", label: "Community Members" },
+              { value: "9+", label: "Months Experience" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}

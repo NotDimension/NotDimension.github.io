@@ -4,9 +4,8 @@ import { MapPin } from "lucide-react";
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden grid-bg">
-      {/* Radial gradient overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(145_70%_45%/0.08)_0%,transparent_70%)]" />
-      
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(210_100%_55%/0.06)_0%,transparent_70%)]" />
+
       <div className="relative z-10 text-center px-4">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -14,12 +13,8 @@ const HeroSection = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="mb-8"
         >
-          <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-2 border-primary/30 glow-border">
-            <img
-              src="/images/profile.png"
-              alt="NotDimension profile"
-              className="w-full h-full object-cover"
-            />
+          <div className="w-36 h-36 mx-auto rounded-full overflow-hidden border-2 border-primary/30 glow-border">
+            <img src="/images/profile.png" alt="NotDimension" className="w-full h-full object-cover" />
           </div>
         </motion.div>
 

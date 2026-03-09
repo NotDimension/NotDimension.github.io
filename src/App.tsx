@@ -1,15 +1,14 @@
-import { useEffect, useState, useCallback } from "react";
+// src/App.tsx
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 import ParticleBackground from "@/components/ParticleBackground";
 import ScrollToTop from "@/components/ScrollToTop";
 
-import IntroAnimation from "@/components/IntroAnimation";
 import Index from "./pages/Index";
 import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
@@ -18,6 +17,7 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Animated routes wrapper
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
@@ -33,41 +33,19 @@ const AnimatedRoutes = () => {
   );
 };
 
-const App = () => {
-  const [introComplete, setIntroComplete] = useState(false);
-  const handleIntroComplete = useCallback(() => {
-    setIntroComplete(true);
-    window.scrollTo(0, 0); // Scroll to top after intro
-  }, []);
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        {/* Particle background always visible */}
-        <ParticleBackground />
-
-        <HashRouter>
-          <ScrollToTop />
-          {/* Show intro animation first */}
-          {!introComplete && <IntroAnimation onComplete={handleIntroComplete} />}
-
-          {/* Main content only mounts after intro completes */}
-          {introComplete && (
-            <motion.div
-              className="relative noise-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8 }}
-            >
-              <AnimatedRoutes />
-            </motion.div>
-          )}
-        </HashRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-};
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <ParticleBackground />
+      <HashRouter>
+        {/* Ensure scroll is at top for every route */}
+        <ScrollToTop />
+        <AnimatedRoutes />
+      </HashRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

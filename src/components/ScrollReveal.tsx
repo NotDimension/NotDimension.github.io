@@ -1,5 +1,13 @@
 // src/components/ScrollReveal.tsx
-import { motion, Variants } from "framer-motion";
+import { ReactNode, useEffect, useRef } from "react";
+import { motion, useAnimation, Variants } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+
+interface ScrollRevealProps {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}
 
 const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -10,23 +18,24 @@ const sectionVariants: Variants = {
   },
 };
 
-interface ScrollRevealProps {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}
-
 const ScrollReveal = ({ children, className = "", delay = 0 }: ScrollRevealProps) => {
+  const controls = useAnimation();
+  const [ref, inView] = useInView({ triggerOnce: true, margin: "-100px 0px -100px 0px" });
+
+  useEffect(() => {
+    if (inView) controls.start("visible");
+  }, [controls, inView]);
+
   return (
     <motion.div
-      variants={sectionVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-100px 0px -100px 0px" }}
-      transition={{ delay }}
+      ref={ref}
       className={className}
-      layout // helps with smooth reflow on page
-      style={{ willChange: "transform, opacity" }} // reduces flicker
+      initial="hidden"
+      animate={controls}
+      variants={sectionVariants}
+      transition={{ delay }}
+      layout
+      style={{ willChange: "transform, opacity" }}
     >
       {children}
     </motion.div>

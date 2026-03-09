@@ -67,13 +67,13 @@
   background: hsl(225 25% 10% / 0.7);
   backdrop-filter: blur(16px);
   border: 1px solid hsl(225 20% 18% / 0.8);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  border-color: hsl(210 100% 55% / 0.4);
-  box-shadow: 0 0 30px hsl(210 100% 55% / 0.12), 0 8px 32px hsl(225 35% 5% / 0.5);
-  transform: translateY(-2px);
+  border-color: hsl(210 100% 55% / 0.35);
+  box-shadow: 0 0 30px hsl(210 100% 55% / 0.1), 0 8px 32px hsl(225 35% 5% / 0.5);
+  transform: translateY(-3px);
   background: hsl(225 25% 12% / 0.8);
 }
 

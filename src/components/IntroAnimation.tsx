@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import ParticleBackground from "@/components/ParticleBackground";
 
 interface IntroProps {
   onComplete: () => void;
@@ -9,9 +10,9 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
   const [phase, setPhase] = useState(0);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 300); // name starts appearing
-    const t2 = setTimeout(() => setPhase(2), 1500); // fade everything out
-    const t3 = setTimeout(() => onComplete(), 2200);
+    const t1 = setTimeout(() => setPhase(1), 300);   // name starts appearing
+    const t2 = setTimeout(() => setPhase(2), 1600);  // fade everything out
+    const t3 = setTimeout(() => onComplete(), 2200); // end intro
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
@@ -22,34 +23,14 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
         >
-          {/* Subtle background particles */}
-          <motion.div
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.05 }}
-          >
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-primary rounded-full"
-                style={{
-                  top: `${Math.random() * 100}%`,
-                  left: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [0, -20, 0],
-                  x: [0, 20, 0],
-                }}
-                transition={{ repeat: Infinity, duration: 6 + Math.random() * 4, ease: "easeInOut" }}
-              />
-            ))}
-          </motion.div>
+          {/* Particle Background */}
+          <ParticleBackground />
 
-          {/* Profile picture */}
+          {/* Profile Picture */}
           <motion.div
-            className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden mb-6"
+            className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden mb-6 border-2 border-primary/40 shadow-lg shadow-primary/20"
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -61,7 +42,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
             />
           </motion.div>
 
-          {/* Name reveal */}
+          {/* Name Reveal */}
           <motion.h1
             className="flex flex-wrap justify-center text-4xl md:text-6xl font-bold font-mono gap-1"
             initial={{ opacity: 0 }}

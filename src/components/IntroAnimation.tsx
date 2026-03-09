@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const IntroAnimation = ({ onComplete }: { onComplete: () => void }) => {
+interface IntroProps {
+  onComplete: () => void;
+}
+
+const IntroAnimation = ({ onComplete }: IntroProps) => {
   const [phase, setPhase] = useState(0);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 400);
-    const t2 = setTimeout(() => setPhase(2), 1400);
-    const t3 = setTimeout(() => {
-      setPhase(3);
-      onComplete();
-    }, 2500);
+    const t1 = setTimeout(() => setPhase(1), 300); // name starts appearing
+    const t2 = setTimeout(() => setPhase(2), 1500); // fade everything out
+    const t3 = setTimeout(() => onComplete(), 2200);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
@@ -18,88 +19,77 @@ const IntroAnimation = ({ onComplete }: { onComplete: () => void }) => {
     <AnimatePresence>
       {phase < 3 && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-background"
-          exit={{ opacity: 0, transition: { duration: 0.6 } }}
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
         >
-          {/* Scanning Lines */}
+          {/* Subtle background particles */}
           <motion.div
-            className="absolute inset-0 overflow-hidden"
+            className="absolute inset-0"
             initial={{ opacity: 0 }}
-            animate={{ opacity: phase >= 1 ? 0.12 : 0 }}
+            animate={{ opacity: 0.05 }}
           >
-            {[...Array(6)].map((_, i) => (
+            {[...Array(20)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute left-0 right-0 h-[1px] bg-primary/20"
-                style={{ top: `${(i + 1) * 15}%` }}
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: phase >= 1 ? 1 : 0 }}
-                transition={{ duration: 0.6, delay: i * 0.06, ease: "easeOut" }}
+                className="absolute w-1 h-1 bg-primary rounded-full"
+                style={{
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  y: [0, -20, 0],
+                  x: [0, 20, 0],
+                }}
+                transition={{ repeat: Infinity, duration: 6 + Math.random() * 4, ease: "easeInOut" }}
               />
             ))}
           </motion.div>
 
-          {/* Central Content */}
-          <div className="relative text-center">
-            {/* Brackets */}
-            <motion.div
-              className="text-primary/40 font-mono text-7xl md:text-9xl font-thin mb-6"
-              initial={{ opacity: 0, letterSpacing: "0.5em" }}
-              animate={{
-                opacity: phase >= 0 ? 1 : 0,
-                letterSpacing: phase >= 1 ? "0.15em" : "0.5em",
-              }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-              {"< >"}
-            </motion.div>
+          {/* Profile picture */}
+          <motion.div
+            className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden mb-6"
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <img
+              src="/images/profile.png"
+              alt="NotDimension"
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
 
-            {/* Name */}
-            <motion.h1
-              className="absolute inset-0 flex items-center justify-center text-4xl md:text-6xl font-bold font-mono"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{
-                opacity: phase >= 1 ? 1 : 0,
-                scale: phase >= 1 ? 1 : 0.8,
-              }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <span className="text-primary glow-text">Not</span>
-              <span className="text-foreground">Dimension</span>
-            </motion.h1>
+          {/* Name reveal */}
+          <motion.h1
+            className="flex flex-wrap justify-center text-4xl md:text-6xl font-bold font-mono gap-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            {"NotDimension".split("").map((char, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 20 }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                whileHover={{ scale: 1.3, y: -5, color: "#0ea5e9" }}
+              >
+                {char}
+              </motion.span>
+            ))}
+          </motion.h1>
 
-            {/* Subtitle */}
-            <motion.p
-              className="mt-20 text-base md:text-lg font-mono text-muted-foreground tracking-[0.3em] uppercase"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{
-                opacity: phase >= 2 ? 1 : 0,
-                y: phase >= 2 ? 0 : 8,
-              }}
-              transition={{ duration: 0.5 }}
-            >
-              Initializing...
-            </motion.p>
-          </div>
-
-          {/* Corner accents */}
-          {[
-            "top-6 left-6",
-            "top-6 right-6 rotate-90",
-            "bottom-6 left-6 -rotate-90",
-            "bottom-6 right-6 rotate-180",
-          ].map((pos, i) => (
-            <motion.div
-              key={i}
-              className={`absolute ${pos} w-10 h-10`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: phase >= 1 ? 0.25 : 0 }}
-              transition={{ duration: 0.4, delay: 0.35 + i * 0.07 }}
-            >
-              <div className="w-full h-[1px] bg-primary" />
-              <div className="w-[1px] h-full bg-primary" />
-            </motion.div>
-          ))}
+          {/* Subtitle */}
+          <motion.p
+            className="mt-4 text-sm md:text-base text-muted-foreground tracking-[0.1em] uppercase"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 10 }}
+            transition={{ duration: 0.5, delay: 1 }}
+          >
+            Initializing...
+          </motion.p>
         </motion.div>
       )}
     </AnimatePresence>

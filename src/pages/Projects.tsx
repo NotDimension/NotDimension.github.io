@@ -5,6 +5,7 @@ import PageHeader from "@/components/PageHeader";
 const liveProjects = [
   { name: "ShadySMP", role: "Co‑Owner", members: "450+", icon: "/images/icons/shady.png", discord: "https://discord.gg/Jg48d8xbcD", desc: "A community‑oriented SMP with custom plugins, events, and a growing player base." },
   { name: "Discord Collective", role: "Manager", members: "60+", icon: "/images/icons/collective.png", discord: "https://discord.gg/nUMJ52Pycj", desc: "A server focused on Community and Events with engaged members." },
+  { name: "Shade Network", role: "Owner", members: "350", icon: "/images/icons/shade.png", discord: "https://discord.gg/yRSHNEnb7Z", description: "A community-oriented Network with Economy and Lifesteal gamemodes." },
 ];
 
 const technicalCreations = [

@@ -6,6 +6,7 @@ const liveProjects = [
   { name: "ShadySMP", role: "Co‑Owner", members: "450+", icon: "/images/icons/shady.png", discord: "https://discord.gg/Jg48d8xbcD", desc: "A community‑oriented SMP with custom plugins, events, and a growing player base." },
   { name: "Discord Collective", role: "Manager", members: "60+", icon: "/images/icons/collective.png", discord: "https://discord.gg/nUMJ52Pycj", desc: "A server focused on Community and Events with engaged members." },
   { name: "Shade Network", role: "Owner", members: "350", icon: "/images/icons/shade.png", discord: "https://discord.gg/yRSHNEnb7Z", description: "A community-oriented Network with Economy and Lifesteal gamemodes." },
+  { name: "Prism SMP", role: "Staff Manager", members: "700", icon: "/images/icons/prism.png", discord: "https://discord.gg/8Tjt9W4q5N", description: "A community-oriented server." },
 ];
 
 const technicalCreations = [
@@ -14,7 +15,6 @@ const technicalCreations = [
 ];
 
 const archivedProjects = [
-  { name: "Prism SMP", role: "Owner", members: "700", icon: "/images/icons/prism.png", note: "Left in November 2025" },
   { name: "OceanMC", role: "Owner", members: "300", icon: "/images/icons/ocean.png", note: "Closed in December 2025" },
   { name: "SteakySMP", role: "Co‑Owner", members: "1.5k", icon: "/images/icons/steaky.png", note: "Left in October 2025" },
   { name: "ShatterMC", role: "Senior Admin", members: "260", icon: "/images/icons/shatter.png", note: "Left in November 2025" },

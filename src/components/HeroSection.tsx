@@ -5,9 +5,9 @@ const HeroSection = () => {
   const name = "NotDimension";
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden grid-bg">
-      {/* Central Emerald Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(155_100%_45%/0.12)_0%,transparent_70%)] pointer-events-none" />
+    <section className="hero-bg relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Soft accent halo overlays handled by .hero-bg::after */}
+      <div className="absolute inset-0 pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">

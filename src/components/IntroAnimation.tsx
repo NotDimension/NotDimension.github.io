@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import ParticleBackground from "@/components/ParticleBackground";
 
 interface IntroProps {
   onComplete: () => void;
@@ -25,8 +24,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
         >
-          {/* Particle Background - Now using the Emerald/White logic */}
-          <ParticleBackground />
+          {/* Particles render globally from App.tsx */}
 
           {/* Profile Picture - Updated with Emerald Glow */}
           <motion.div

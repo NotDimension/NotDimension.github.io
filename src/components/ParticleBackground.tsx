@@ -36,7 +36,16 @@ const ParticleBackground = () => {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    // Detect low-end: coarse pointer (mobile), low core count, low memory
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const isCoarse = window.matchMedia("(pointer: coarse)").matches;
+    const lowEnd =
+      isCoarse ||
+      (nav.hardwareConcurrency && nav.hardwareConcurrency <= 4) ||
+      (nav.deviceMemory && nav.deviceMemory <= 4);
+
+    // Cap DPR aggressively on low-end devices
+    const dpr = Math.min(window.devicePixelRatio || 1, lowEnd ? 1 : 1.5);
 
     const resize = () => {
       const w = window.innerWidth;
@@ -47,10 +56,8 @@ const ParticleBackground = () => {
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const target = Math.min(
-        window.innerWidth < 768 ? 25 : 50,
-        Math.floor((w * h) / 28000)
-      );
+      const cap = lowEnd ? (w < 768 ? 18 : 28) : w < 768 ? 28 : 55;
+      const target = Math.min(cap, Math.floor((w * h) / (lowEnd ? 45000 : 28000)));
       particlesRef.current = Array.from({ length: target }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,

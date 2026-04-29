@@ -7,6 +7,7 @@ import { HashRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 
 import ParticleBackground from "@/components/ParticleBackground";
+import CursorCat from "@/components/CursorCat";
 import ScrollToTop from "@/components/ScrollToTop";
 
 import Index from "./pages/Index";
@@ -39,6 +40,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <ParticleBackground />
+      <CursorCat />
       <HashRouter>
         {/* Ensure scroll is at top for every route */}
         <ScrollToTop />

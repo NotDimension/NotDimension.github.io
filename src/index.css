@@ -6,33 +6,39 @@
 
 @layer base {
   :root {
-    --background: 225 35% 5%;
-    --foreground: 210 40% 95%;
+    /* Clean White/Off-white Background */
+    --background: 160 20% 98%; 
+    --foreground: 160 50% 5%;
 
-    --card: 225 30% 9%;
-    --card-foreground: 210 40% 95%;
+    /* Soft Green Tinted Cards */
+    --card: 0 0% 100%;
+    --card-foreground: 160 50% 5%;
 
-    --popover: 225 30% 9%;
-    --popover-foreground: 210 40% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 160 50% 5%;
 
-    --primary: 210 100% 55%;
-    --primary-foreground: 225 35% 5%;
+    /* Deep Forest Green - Primary */
+    --primary: 155 100% 18%; 
+    --primary-foreground: 160 20% 98%;
 
-    --secondary: 225 25% 14%;
-    --secondary-foreground: 210 30% 80%;
+    /* Soft Sage Green - Secondary */
+    --secondary: 145 30% 90%;
+    --secondary-foreground: 155 50% 15%;
 
-    --muted: 225 25% 12%;
-    --muted-foreground: 220 15% 50%;
+    --muted: 145 20% 94%;
+    --muted-foreground: 160 10% 40%;
 
-    --accent: 200 90% 50%;
-    --accent-foreground: 225 35% 5%;
+    /* Lake Cyan (from the image) - Accent */
+    --accent: 185 85% 45%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 225 20% 16%;
-    --input: 225 20% 16%;
-    --ring: 210 100% 55%;
+    /* Subtle Green Borders */
+    --border: 155 20% 88%;
+    --input: 155 20% 88%;
+    --ring: 155 100% 18%;
 
     --radius: 0.75rem;
   }
@@ -47,41 +53,54 @@
   }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: hsl(225 35% 5%); }
-::-webkit-scrollbar-thumb { background: hsl(225 20% 20%); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(210 100% 55%); }
+/* Updated Scenic Background */
+.grid-bg {
+  /* This creates a light white fade over your image so text stays readable */
+  background-image: 
+    linear-gradient(hsl(var(--background) / 0.8), hsl(var(--background) / 0.8)),
+    url('/bg-landscape.jpg'); /* Make sure your image is in the /public folder! */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+}
 
-/* Glow */
+/* Scrollbar - Green Theme */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: hsl(var(--background)); }
+::-webkit-scrollbar-thumb { background: hsl(155 20% 80%); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary)); }
+
+/* Glow Effects - Adjusted for White Theme */
 .glow-text {
-  text-shadow: 0 0 20px hsl(210 100% 55% / 0.5), 0 0 60px hsl(210 100% 55% / 0.15);
+  text-shadow: 0 0 15px hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary));
 }
 
 .glow-border {
-  box-shadow: 0 0 20px hsl(210 100% 55% / 0.15), inset 0 0 20px hsl(210 100% 55% / 0.05);
+  box-shadow: 0 0 20px hsl(var(--primary) / 0.1), inset 0 0 10px hsl(var(--primary) / 0.05);
 }
 
-/* Glass card */
+/* Glass card - Light Version */
 .glass-card {
-  background: hsl(225 25% 10% / 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid hsl(225 20% 18% / 0.8);
+  background: hsl(0 0% 100% / 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border));
   transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  border-color: hsl(210 100% 55% / 0.35);
-  box-shadow: 0 0 30px hsl(210 100% 55% / 0.1), 0 8px 32px hsl(225 35% 5% / 0.5);
+  border-color: hsl(var(--primary) / 0.4);
+  box-shadow: 0 10px 30px hsl(var(--primary) / 0.08);
   transform: translateY(-3px);
-  background: hsl(225 25% 12% / 0.8);
+  background: hsl(0 0% 100% / 0.8);
 }
 
-/* Role card - bigger with nicer hover */
+/* Role card - Enhanced Green Hover */
 .role-card {
-  background: hsl(225 25% 10% / 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid hsl(225 20% 18% / 0.8);
+  background: hsl(0 0% 100% / 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border));
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -93,38 +112,39 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, hsl(210 100% 55% / 0.5), transparent);
+  height: 3px;
+  background: linear-gradient(90deg, transparent, hsl(var(--accent)), transparent);
   opacity: 0;
   transition: opacity 0.4s ease;
 }
 
 .role-card:hover {
-  border-color: hsl(210 100% 55% / 0.4);
-  box-shadow: 0 0 40px hsl(210 100% 55% / 0.15), 0 12px 40px hsl(225 35% 5% / 0.6);
+  border-color: hsl(var(--accent) / 0.5);
+  box-shadow: 0 15px 40px hsl(var(--primary) / 0.1);
   transform: translateY(-4px) scale(1.01);
-  background: hsl(225 25% 12% / 0.85);
 }
 
 .role-card:hover::before {
   opacity: 1;
 }
 
-/* Grid background */
-.grid-bg {
-  background-image:
-    linear-gradient(hsl(225 20% 14% / 0.3) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(225 20% 14% / 0.3) 1px, transparent 1px);
-  background-size: 60px 60px;
+/* Timeline - Forest Green */
+.timeline-line {
+  background: linear-gradient(to bottom, hsl(var(--primary) / 0.4), hsl(var(--primary) / 0.1));
 }
 
-/* Noise overlay */
+.timeline-dot {
+  background: hsl(var(--primary));
+  box-shadow: 0 0 12px hsl(var(--primary) / 0.3);
+}
+
+/* Noise overlay - Kept subtle */
 .noise-overlay::before {
   content: '';
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  opacity: 0.025;
+  opacity: 0.015;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 50;
@@ -138,14 +158,4 @@
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* Timeline */
-.timeline-line {
-  background: linear-gradient(to bottom, hsl(210 100% 55% / 0.3), hsl(210 100% 55% / 0.05));
-}
-
-.timeline-dot {
-  background: hsl(210 100% 55%);
-  box-shadow: 0 0 12px hsl(210 100% 55% / 0.5);
 }

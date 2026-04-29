@@ -6,114 +6,131 @@ interface Particle {
   vx: number;
   vy: number;
   size: number;
-  opacity: number;
-  color: string;
+  baseOpacity: number;
 }
 
+/**
+ * Lightweight particle background — hero-only, perf-tuned:
+ * - Pauses when hero is offscreen (IntersectionObserver)
+ * - Pauses when tab hidden
+ * - Dropped expensive O(n²) connection lines (huge win)
+ * - Lower particle count, devicePixelRatio aware
+ * - Honors prefers-reduced-motion
+ */
 const ParticleBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
-  const mouseRef = useRef({ x: -1000, y: -1000 });
   const animRef = useRef<number>(0);
+  const visibleRef = useRef(true);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (reduceMotion) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const target = Math.min(
+        window.innerWidth < 768 ? 25 : 50,
+        Math.floor((w * h) / 28000)
+      );
+      particlesRef.current = Array.from({ length: target }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.18,
+        vy: (Math.random() - 0.5) * 0.18,
+        size: Math.random() * 1.6 + 0.4,
+        baseOpacity: Math.random() * 0.35 + 0.1,
+      }));
     };
     resize();
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", resize, { passive: true });
 
-    const count = Math.min(80, Math.floor((window.innerWidth * window.innerHeight) / 15000));
-    particlesRef.current = Array.from({ length: count }, () => {
-      const isWhite = Math.random() > 0.6;
-      const color = isWhite 
-        ? `155, 10%, 98%`  // Bright White
-        : `155, 100%, 40%`; // Deep Emerald
+    // Pause when hero is offscreen
+    const hero = document.querySelector(".hero-bg");
+    let observer: IntersectionObserver | null = null;
+    if (hero) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          visibleRef.current = entries[0]?.isIntersecting ?? true;
+        },
+        { threshold: 0.01 }
+      );
+      observer.observe(hero);
+    }
 
-      return {
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
-        size: Math.random() * 1.8 + 0.5,
-        opacity: Math.random() * 0.4 + 0.1,
-        color: color,
-      };
-    });
-
-    const handleMouse = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
+    // Pause on tab hidden
+    const onVisibility = () => {
+      if (document.hidden) visibleRef.current = false;
+      else if (!hero) visibleRef.current = true;
     };
-    window.addEventListener("mousemove", handleMouse);
+    document.addEventListener("visibilitychange", onVisibility);
 
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let lastT = performance.now();
+    const animate = (t: number) => {
+      const dt = Math.min((t - lastT) / 16.6667, 2); // normalize to ~60fps
+      lastT = t;
+
+      if (!visibleRef.current) {
+        animRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+      ctx.clearRect(0, 0, w, h);
+
       const particles = particlesRef.current;
-      const mouse = mouseRef.current;
-
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 120) {
-          const force = (120 - dist) / 120;
-          p.vx += (dx / dist) * force * 0.02;
-          p.vy += (dy / dist) * force * 0.02;
-        }
-
-        p.vx *= 0.99;
-        p.vy *= 0.99;
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        if (p.x < -10) p.x = w + 10;
+        else if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10;
+        else if (p.y > h + 10) p.y = -10;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.color}, ${p.opacity})`;
+        ctx.fillStyle = `hsla(155, 100%, 60%, ${p.baseOpacity})`;
         ctx.fill();
       }
 
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `hsla(155, 100%, 40%, ${0.05 * (1 - dist / 150)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      }
       animRef.current = requestAnimationFrame(animate);
     };
-    animate();
+    animRef.current = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", handleMouse);
+      document.removeEventListener("visibilitychange", onVisibility);
+      observer?.disconnect();
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
+      aria-hidden="true"
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.7 }}
+      style={{ opacity: 0.55 }}
     />
   );
 };

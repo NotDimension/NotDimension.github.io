@@ -78,8 +78,7 @@
 }
 
 /* =========================================================
-   HERO BACKGROUND — image only on hero, no fixed-attachment
-   (background-attachment: fixed is a major mobile perf killer)
+   HERO BACKGROUND
    ========================================================= */
 .hero-bg {
   position: relative;
@@ -96,7 +95,6 @@
   background-position: center;
   background-repeat: no-repeat;
   z-index: -2;
-  /* Subtle slow drift for life */
   animation: heroDrift 30s ease-in-out infinite alternate;
   will-change: transform;
 }
@@ -122,9 +120,6 @@
   100% { transform: scale(1.1) translate(-1.5%, -1%); }
 }
 
-/* Body background for non-hero sections — transparent so the
-   site-wide particle canvas (behind content) shows through.
-   The base color comes from <body>. */
 .app-bg {
   background:
     radial-gradient(ellipse at 20% 0%, hsl(155 100% 45% / 0.04) 0%, transparent 50%),
@@ -132,7 +127,7 @@
 }
 
 /* =========================================================
-   GLASS / CARD STYLES — scoped to actual classes (no broad selectors)
+   GLASS / CARD STYLES
    ========================================================= */
 .glass-card,
 .role-card {
@@ -157,7 +152,6 @@
   box-shadow: var(--shadow-glow), 0 12px 40px hsl(0 0% 0% / 0.5);
 }
 
-/* Cheap shimmer using gradient-position instead of repainting overlay */
 .role-card {
   background-image:
     linear-gradient(135deg, hsl(155 40% 7% / 0.85) 0%, hsl(155 40% 5% / 0.85) 100%),
@@ -192,7 +186,6 @@
   box-shadow: var(--shadow-glow), inset 0 0 20px hsl(var(--accent) / 0.06);
 }
 
-/* Animated gradient text */
 .gradient-text {
   background: linear-gradient(
     90deg,
@@ -212,20 +205,50 @@
 }
 
 /* =========================================================
-   FLOATING / BREATHING — sparingly used
+   CAT SPRITE SYSTEM (48x48 Grid)
    ========================================================= */
-.floating {
-  animation: float 6s ease-in-out infinite;
-  will-change: transform;
+.cat-container {
+  width: 48px;
+  height: 48px;
+  position: fixed;
+  pointer-events: none;
+  image-rendering: pixelated; 
+  z-index: 9999;
+  will-change: transform, left, top;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
+.cat-sprite {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  backface-visibility: hidden; /* Prevents flickering during transform */
 }
+
+/* IDLE: 10 frames - background-position: 0 to -480px */
+.state-idle {
+  background-image: url('/sprites/IDLE.png');
+  animation: play-idle 1.0s steps(10) infinite;
+}
+
+/* WALK: 14 frames - background-position: 0 to -672px */
+.state-walk {
+  background-image: url('/sprites/WALK.png');
+  animation: play-walk 0.8s steps(14) infinite;
+}
+
+/* RUN: 8 frames - background-position: 0 to -384px */
+.state-run {
+  background-image: url('/sprites/RUN.png');
+  animation: play-run 0.5s steps(8) infinite;
+}
+
+@keyframes play-idle { from { background-position: 0; } to { background-position: -480px; } }
+@keyframes play-walk { from { background-position: 0; } to { background-position: -672px; } }
+@keyframes play-run  { from { background-position: 0; } to { background-position: -384px; } }
 
 /* =========================================================
-   NOISE OVERLAY (very low opacity, fixed, cheap)
+   NOISE & DECORATIVE
    ========================================================= */
 .noise-overlay::before {
   content: '';
@@ -238,32 +261,20 @@
   mix-blend-mode: overlay;
 }
 
-/* =========================================================
-   CONTENT VISIBILITY — skip rendering offscreen sections
-   ========================================================= */
 .cv-auto {
   content-visibility: auto;
   contain-intrinsic-size: 1px 600px;
 }
 
-/* =========================================================
-   SCROLLBAR
-   ========================================================= */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--accent) / 0.25);
   border-radius: 8px;
-  transition: background 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--accent) / 0.55); }
 
-/* =========================================================
-   SECTION DIVIDER — soft line
-   ========================================================= */
-.section-divider {
-  position: relative;
-}
+.section-divider { position: relative; }
 .section-divider::before {
   content: '';
   position: absolute;
@@ -272,10 +283,5 @@
   transform: translateX(-50%);
   width: clamp(120px, 25%, 280px);
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    hsl(var(--accent) / 0.35),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, hsl(var(--accent) / 0.35), transparent);
 }

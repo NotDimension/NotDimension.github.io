@@ -107,7 +107,6 @@ const ParticleBackground = () => {
       cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibility);
-      observer?.disconnect();
     };
   }, []);
 

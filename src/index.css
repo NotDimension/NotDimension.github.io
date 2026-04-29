@@ -15,7 +15,7 @@
     --card-foreground: 155 10% 98%;
 
     --primary: 155 20% 98%; 
-    --accent: 155 100% 45%; /* Vibrant Emerald */
+    --accent: 155 100% 45%; 
     --border: 155 30% 18%;
     --radius: 1rem;
   }
@@ -24,66 +24,58 @@
 @layer base {
   * { @apply border-border; }
   body {
-    /* Solid base color for the whole site */
     background-color: hsl(var(--background));
     @apply text-foreground font-sans antialiased min-h-screen;
   }
 }
 
-/* 1. HERO BACKGROUND SECTION */
+/* 1. HERO BACKGROUND (Restricted to Hero only) */
 .grid-bg {
-  /* Ensure the filename image(3).jpg is in your /public folder */
+  position: relative;
+  /* Make sure image(3).jpg is in your /public folder */
   background-image: 
     linear-gradient(
-      to bottom,
-      hsl(var(--background) / 0.7) 0%, 
-      hsl(var(--background) / 1) 100%
+      to bottom, 
+      rgba(3, 13, 8, 0.7) 0%, 
+      rgba(3, 13, 8, 1) 100%
     ),
-    url('/image(3).jpg'); 
+    url('/image(3).jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  position: relative;
   z-index: 1;
 }
 
-/* 2. UNIVERSAL CARD STYLING (Borders & Glows) */
-/* This targets your Roles, Projects, About, and Contact cards */
+/* 2. UNIVERSAL CARD BORDERS (Fixes Roles, Projects, About, Contact) */
 .glass-card, 
-.role-card,
-section div[class*="bg-card"], 
-section div[class*="rounded-"] {
-  @apply relative transition-all duration-500 ease-out;
-  background: hsl(var(--card) / 0.6) !important;
+.role-card {
+  @apply relative overflow-hidden transition-all duration-500 ease-out;
+  background: hsl(var(--card) / 0.7) !important;
   backdrop-filter: blur(12px);
-  
-  /* The Emerald Border - Forced Visibility */
-  border: 1px solid hsl(var(--accent) / 0.3) !important;
+  /* The Emerald Border */
+  border: 1px solid hsl(var(--accent) / 0.35) !important;
   box-shadow: 0 0 20px hsl(var(--accent) / 0.05);
 }
 
-/* 3. HOVER ANIMATIONS */
+/* 3. CARD HOVER ANIMATION */
 .glass-card:hover, 
-.role-card:hover,
-section div[class*="bg-card"]:hover,
-section div[class*="rounded-"]:hover {
+.role-card:hover {
   @apply -translate-y-1;
   border-color: hsl(var(--accent) / 0.8) !important;
-  background: hsl(var(--card) / 0.8) !important;
-  box-shadow: 0 0 30px hsl(var(--accent) / 0.2), 0 10px 40px rgba(0, 0, 0, 0.6);
+  background: hsl(var(--card) / 0.9) !important;
+  box-shadow: 0 0 35px hsl(var(--accent) / 0.15), 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
-/* 4. THE SECTION GLOW */
-/* Adds that soft emerald light behind the content as you scroll */
+/* 4. THE SECTION GLOW (Consistent across all pages/sections) */
 section:not(.grid-bg) {
   background: radial-gradient(
     circle at center, 
     hsl(155 100% 45% / 0.04) 0%, 
-    transparent 70%
+    transparent 75%
   );
 }
 
-/* 5. ADDITIONAL UI GLOWS */
+/* 5. UI GLOWS */
 .glow-text {
   text-shadow: 0 0 15px hsl(var(--primary) / 0.4), 0 0 30px hsl(var(--accent) / 0.2);
 }

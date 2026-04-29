@@ -75,18 +75,18 @@
    CUSTOM INVERTING CURSOR
    ========================================================= */
 .custom-cursor {
-  width: 24px;
-  height: 24px;
-  background-color: white;
+  width: 20px;
+  height: 20px;
+  background-color: #ffffff; /* Must be pure white for the best invert effect */
   border-radius: 50%;
   position: fixed;
   pointer-events: none;
-  z-index: 99999;
-  /* This creates the negative/invert effect */
+  /* z-index must be higher than particles and nav */
+  z-index: 999999; 
   mix-blend-mode: difference;
   will-change: transform;
-  /* Very slight transition for organic feel */
-  transition: transform 0.08s ease-out;
+  /* Keep transition short so it doesn't feel laggy */
+  transition: transform 0.05s ease-out;
 }
 
 /* =========================================================

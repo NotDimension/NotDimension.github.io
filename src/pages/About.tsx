@@ -15,10 +15,12 @@ const timeline = [
   { month: "July 2025", events: ["Joined PrismSMP as Admin"] },
   { month: "August 2025", events: ["Promoted to Owner at PrismSMP", "Created OceanMC", "Joined Nebular SMP as Overseer"] },
   { month: "September 2025", events: ["Promoted to Co-Owner at Nebular SMP", "SMP Finder: Promoted to Senior Moderator"] },
-  { month: "October 2025", events: ["Left Nebular SMP"] },
+  { month: "October 2025", events: ["Left Nebular SMP, Left CashflowSMP (SteakyMC)"] },
   { month: "November 2025", events: ["ShatterMC: Jr. Mod → Sr. Admin (left 20th Nov)", "Became Co-Owner at ShadySMP (25th Nov)"] },
   { month: "December 2025", events: ["Closed OceanMC", "Left PrismSMP", "Promoted to Manager at Discord Collective"] },
-  { month: "Ongoing", events: ["Currently Co-Owner at ShadySMP"] },
+  { month: "February 2026", events: ["Removed from Echo SMP due to inactivity.", "Left Discord Collective", "Rejoined and left PrismSMP(AxonMC)", "Left Shade Network.", "Left all of these due to the servers being inactive." ] },
+  { month: "April 2026", events: ["Began a new season at Shady SMP where it is currently active", "Joined SMPFinder as SRA, then changed roles to Admin." ] },
+  { month: "Ongoing", events: ["Currently Co-Owner at ShadySMP and Admin at SMPFinder."] },
 ];
 
 const interests = [

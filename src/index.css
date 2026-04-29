@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+=@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,82 +11,70 @@
     --card: 155 40% 5%;
     --accent: 155 100% 45%; 
     --border: 155 30% 18%;
-    --radius: 1rem;
   }
 }
 
 @layer base {
   body {
+    /* Solid background color for the rest of the site */
     background-color: hsl(var(--background));
     @apply text-foreground font-sans antialiased min-h-screen;
   }
 }
 
-/* 1. HERO BACKGROUND */
+/* 1. HERO BACKGROUND WITH FADE-OUT ON SCROLL */
 .grid-bg {
   position: relative;
+  min-height: 100vh;
+  /* Fixes the image so it stays put while content moves over it */
+  background-attachment: fixed; 
   background-image: 
-    linear-gradient(to bottom, rgba(3, 13, 8, 0.7) 0%, rgba(3, 13, 8, 1) 100%),
+    /* This gradient handles the fade to the solid color at the bottom */
+    linear-gradient(
+      to bottom, 
+      rgba(3, 13, 8, 0.4) 0%, 
+      rgba(3, 13, 8, 0.8) 70%,
+      hsl(var(--background)) 100%
+    ),
     url('/image(3).jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  z-index: 1;
 }
 
-/* 2. THE FIX: UNIVERSAL BORDER SELECTOR */
-/* This targets .glass-card, .role-card, and ANY div that acts as a container in your sections */
+/* 2. UNIVERSAL CARD BORDERS (Fixes Roles, Projects, Lists, etc.) */
 .glass-card, 
 .role-card,
 section div[class*="bg-card"],
 section div[class*="rounded-xl"],
 section div[class*="border"] {
   @apply relative transition-all duration-500 ease-out;
-  background: hsl(var(--card) / 0.6) !important;
+  background: hsl(var(--card) / 0.7) !important;
   backdrop-filter: blur(12px);
-  
-  /* Force the Emerald Border back on */
   border: 1px solid hsl(var(--accent) / 0.3) !important;
   box-shadow: 0 0 20px hsl(var(--accent) / 0.05);
 }
 
-/* 3. HOVER STATE FOR ALL CONTAINERS */
+/* 3. HOVER ANIMATIONS */
 .glass-card:hover, 
 .role-card:hover,
 section div[class*="bg-card"]:hover,
 section div[class*="rounded-xl"]:hover {
   @apply -translate-y-1;
   border-color: hsl(var(--accent) / 0.8) !important;
-  box-shadow: 0 0 30px hsl(var(--accent) / 0.15), 0 10px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 35px hsl(var(--accent) / 0.15), 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
 /* 4. SECTION GLOWS */
 section:not(.grid-bg) {
-  background: radial-gradient(circle at center, hsl(155 100% 45% / 0.04) 0%, transparent 75%);
+  background: radial-gradient(circle at center, hsl(155 100% 45% / 0.06) 0%, transparent 75%);
 }
 
-/* 5. UI ELEMENTS */
+/* UI Details */
 .glow-text {
-  text-shadow: 0 0 15px hsl(var(--primary) / 0.4), 0 0 30px hsl(var(--accent) / 0.2);
+  text-shadow: 0 0 15px hsl(var(--accent) / 0.4);
 }
 
-.timeline-line {
-  background: linear-gradient(to bottom, hsl(var(--accent) / 0.5), transparent);
-}
-
-.timeline-dot {
-  background: hsl(var(--accent));
-  box-shadow: 0 0 15px hsl(var(--accent) / 0.6);
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { 
-  background: hsl(var(--accent) / 0.2); 
-  border-radius: 10px; 
-}
-
-/* Noise overlay */
 .noise-overlay::before {
   content: '';
   position: fixed;
@@ -96,3 +84,6 @@ section:not(.grid-bg) {
   pointer-events: none;
   z-index: 50;
 }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: hsl(var(--accent) / 0.2); border-radius: 10px; }

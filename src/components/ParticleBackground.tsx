@@ -7,6 +7,7 @@ interface Particle {
   vy: number;
   size: number;
   opacity: number;
+  color: string; // Added color property to vary between green/white
 }
 
 const ParticleBackground = () => {
@@ -28,16 +29,25 @@ const ParticleBackground = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    // Init particles
+    // Init particles with color variance
     const count = Math.min(80, Math.floor((window.innerWidth * window.innerHeight) / 15000));
-    particlesRef.current = Array.from({ length: count }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      size: Math.random() * 2 + 0.5,
-      opacity: Math.random() * 0.5 + 0.1,
-    }));
+    particlesRef.current = Array.from({ length: count }, () => {
+      // Randomly pick between White and Lake Cyan/Green
+      const isWhite = Math.random() > 0.5;
+      const color = isWhite 
+        ? `160, 20%, 98%`  // White/Mint
+        : `185, 90%, 60%`; // Lake Cyan
+
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 2 + 0.5,
+        opacity: Math.random() * 0.5 + 0.1,
+        color: color,
+      };
+    });
 
     const handleMouse = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY };
@@ -73,7 +83,8 @@ const ParticleBackground = () => {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(210, 100%, 60%, ${p.opacity})`;
+        // Using the per-particle color assigned during init
+        ctx.fillStyle = `hsla(${p.color}, ${p.opacity})`;
         ctx.fill();
       }
 
@@ -87,7 +98,8 @@ const ParticleBackground = () => {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `hsla(210, 100%, 60%, ${0.08 * (1 - dist / 150)})`;
+            // Connections use a very faint version of the first particle's color
+            ctx.strokeStyle = `hsla(${particles[i].color}, ${0.08 * (1 - dist / 150)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -109,7 +121,7 @@ const ParticleBackground = () => {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.6 }}
+      style={{ opacity: 0.8 }} // Increased opacity slightly to see the white better
     />
   );
 };

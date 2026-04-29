@@ -1,32 +1,52 @@
-// src/components/ScrollReveal.tsx
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
-import { useInView } from "react-intersection-observer";
 
 interface ScrollRevealProps {
   children: ReactNode;
   className?: string;
   delay?: number;
+  y?: number;
 }
 
-const ScrollReveal = ({ children, className = "", delay = 0 }: ScrollRevealProps) => {
+/**
+ * Lightweight scroll reveal using native IntersectionObserver — no extra deps.
+ * One-shot reveal, GPU-friendly transform/opacity only.
+ */
+const ScrollReveal = ({
+  children,
+  className = "",
+  delay = 0,
+  y = 24,
+}: ScrollRevealProps) => {
   const controls = useAnimation();
-  const [ref, inView] = useInView({ triggerOnce: true, rootMargin: "-80px 0px -80px 0px" });
+  const ref = useRef<HTMLDivElement>(null);
+  const [seen, setSeen] = useState(false);
 
   useEffect(() => {
-    if (inView) {
-      controls.start({
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.7, delay },
-      });
-    }
-  }, [controls, inView, delay]);
+    if (!ref.current || seen) return;
+    const node = ref.current;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setSeen(true);
+          controls.start({
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] },
+          });
+          obs.disconnect();
+        }
+      },
+      { rootMargin: "-60px 0px -60px 0px", threshold: 0.05 }
+    );
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, [controls, delay, seen]);
 
   return (
-    <div ref={ref} className={className} style={{ overflow: "hidden" }}>
+    <div ref={ref} className={className}>
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y }}
         animate={controls}
         style={{ willChange: "transform, opacity" }}
       >

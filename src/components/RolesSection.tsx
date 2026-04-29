@@ -17,20 +17,20 @@ const roleIcon = (role: string) => {
 };
 
 const currentRoles: Role[] = [
+  { name: "SMP Finder", role: "Admin/SRA", members: "45k", icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/pQ8tvD533J", description: "Helping players find and join the best SMP servers." },
   { name: "ShadySMP", role: "Co-Owner", members: "450", icon: "/images/icons/shady.png", discord: "https://discord.gg/Jg48d8xbcD", description: "A community-oriented SMP with custom plugins, events, and a growing player base." },
-  { name: "Discord Collective", role: "Manager", members: "120", icon: "/images/icons/collective.png", discord: "https://discord.gg/nUMJ52Pycj", description: "A server focused on community and events with engaged members." },
-  { name: "Shade Network", role: "Owner", members: "350", icon: "/images/icons/shade.png", discord: "https://discord.gg/yRSHNEnb7Z", description: "A community-oriented Network with Economy and Lifesteal gamemodes." },
-  { name: "Prism SMP", role: "Staff Manager", members: "800", icon: "/images/icons/prism.png", discord: "https://discord.gg/cVBDxNxP5c", description: "Led a thriving SMP community with custom gameplay systems." },
 ];
 
 const previousRoles: Role[] = [
   
   { name: "ShatterMC", role: "Senior Admin", members: "260", icon: "/images/icons/shatter.png", discord: "https://discord.gg/sfSnvmtFfA", description: "Managed server operations and staff coordination." },
-  { name: "SMP Finder", role: "Senior Moderator", members: "40k", icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/cuP8bPZgYv", description: "Helping players find and join the best SMP servers." },
   { name: "OceanMC", role: "Owner", members: "300", icon: "/images/icons/ocean.png", discord: "https://discord.gg/YEgAUe8UMp", description: "Founded and managed a custom ocean-themed SMP." },
   { name: "SteakySMP (Now RambleSMP)", role: "Co-Owner", members: "2k", icon: "/images/icons/steaky.png", discord: "https://discord.gg/nGVcVzK6", description: "Co-managed a large community SMP with events and plugins." },
   { name: "BonkMC", role: "Moderator", members: "7k", icon: "/images/icons/bonk.png", discord: "https://discord.gg/XV4EGPxHqc", description: "Moderated one of the larger community servers." },
   { name: "Nebular SMP", role: "Overseer/Co-Owner", members: "200", icon: "/images/icons/nebular.png", discord: "https://discord.gg/YYwWMXxKAz", description: "Oversaw server operations and community growth." },
+  { name: "Discord Collective", role: "Manager", members: "120", icon: "/images/icons/collective.png", discord: "https://discord.gg/nUMJ52Pycj", description: "A server focused on community and events with engaged members." },
+  { name: "Shade Network", role: "Owner", members: "350", icon: "/images/icons/shade.png", discord: "https://discord.gg/yRSHNEnb7Z", description: "A community-oriented Network with Economy and Lifesteal gamemodes." },
+  { name: "Prism SMP", role: "Staff Manager", members: "800", icon: "/images/icons/prism.png", discord: "https://discord.gg/cVBDxNxP5c", description: "Led a thriving SMP community with custom gameplay systems." },
 ];
 
 const RoleCard = ({ role, index }: { role: Role; index: number }) => {

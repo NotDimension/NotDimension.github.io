@@ -40,6 +40,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <ParticleBackground />
+      <CursorCat />
       <HashRouter>
         {/* Ensure scroll is at top for every route */}
         <ScrollToTop />

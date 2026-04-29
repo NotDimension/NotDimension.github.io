@@ -45,18 +45,6 @@ const ConnectSection = () => {
           </div>
         </motion.div>
 
-        <motion.footer
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-24 text-center"
-        >
-          <div className="w-16 h-px bg-gradient-to-r from-transparent via-border to-transparent mx-auto mb-6" />
-          <p className="text-xs font-mono text-muted-foreground">
-            © 2024 NotDimension. All rights reserved.
-          </p>
-        </motion.footer>
       </div>
     </section>
   );

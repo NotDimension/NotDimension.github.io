@@ -8,40 +8,25 @@
   :root {
     --background: 155 45% 3%;
     --foreground: 155 10% 98%;
-
     --card: 155 40% 6%;
     --card-foreground: 155 10% 98%;
-
     --popover: 155 40% 6%;
     --popover-foreground: 155 10% 98%;
-
     --primary: 155 100% 45%;
     --primary-foreground: 155 45% 3%;
-
     --secondary: 155 25% 12%;
     --secondary-foreground: 155 10% 90%;
-
     --muted: 155 25% 10%;
     --muted-foreground: 155 10% 55%;
-
     --accent: 155 100% 45%;
     --accent-foreground: 155 45% 3%;
-
     --destructive: 0 84% 60%;
     --destructive-foreground: 155 10% 98%;
-
     --border: 155 30% 14%;
     --input: 155 30% 14%;
     --ring: 155 100% 45%;
-
     --radius: 0.75rem;
 
-    /* Reusable design tokens */
-    --gradient-hero: radial-gradient(
-      ellipse at 50% 40%,
-      hsl(155 100% 45% / 0.18) 0%,
-      transparent 60%
-    );
     --gradient-card: linear-gradient(
       135deg,
       hsl(155 40% 7% / 0.85) 0%,
@@ -49,31 +34,18 @@
     );
     --shadow-soft: 0 10px 30px -10px hsl(0 0% 0% / 0.5);
     --shadow-glow: 0 0 30px hsl(155 100% 45% / 0.15);
-    --shadow-glow-lg: 0 0 50px hsl(155 100% 45% / 0.25);
     --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
 @layer base {
   * { @apply border-border; }
-
   html { scroll-behavior: smooth; }
-
   body {
     background-color: hsl(var(--background));
     @apply text-foreground font-sans antialiased min-h-screen;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-  }
-
-  /* Reduce motion respect */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
   }
 }
 
@@ -120,12 +92,6 @@
   100% { transform: scale(1.1) translate(-1.5%, -1%); }
 }
 
-.app-bg {
-  background:
-    radial-gradient(ellipse at 20% 0%, hsl(155 100% 45% / 0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 100%, hsl(155 100% 45% / 0.03) 0%, transparent 50%);
-}
-
 /* =========================================================
    GLASS / CARD STYLES
    ========================================================= */
@@ -138,10 +104,7 @@
   border: 1px solid hsl(var(--accent) / 0.18);
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
-  transition:
-    transform 0.4s var(--transition-smooth),
-    border-color 0.4s ease,
-    box-shadow 0.4s ease;
+  transition: transform 0.4s var(--transition-smooth), border-color 0.4s ease, box-shadow 0.4s ease;
   will-change: transform;
 }
 
@@ -152,60 +115,8 @@
   box-shadow: var(--shadow-glow), 0 12px 40px hsl(0 0% 0% / 0.5);
 }
 
-.role-card {
-  background-image:
-    linear-gradient(135deg, hsl(155 40% 7% / 0.85) 0%, hsl(155 40% 5% / 0.85) 100%),
-    linear-gradient(120deg, transparent 30%, hsl(155 100% 45% / 0.08) 50%, transparent 70%);
-  background-size: 100% 100%, 200% 200%;
-  background-position: 0 0, 0% 0%;
-  transition:
-    transform 0.4s var(--transition-smooth),
-    border-color 0.4s ease,
-    box-shadow 0.4s ease,
-    background-position 0.8s ease;
-}
-
-.role-card:hover {
-  background-position: 0 0, 100% 100%;
-}
-
 /* =========================================================
-   TEXT / GLOW UTILITIES
-   ========================================================= */
-.glow-text {
-  text-shadow:
-    0 0 20px hsl(var(--accent) / 0.4),
-    0 0 40px hsl(var(--accent) / 0.15);
-}
-
-.glow-text-soft {
-  text-shadow: 0 0 14px hsl(var(--accent) / 0.25);
-}
-
-.glow-border {
-  box-shadow: var(--shadow-glow), inset 0 0 20px hsl(var(--accent) / 0.06);
-}
-
-.gradient-text {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--accent)) 0%,
-    hsl(155 80% 65%) 50%,
-    hsl(var(--accent)) 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmerText 6s linear infinite;
-}
-
-@keyframes shimmerText {
-  to { background-position: 200% center; }
-}
-
-/* =========================================================
-   CAT SPRITE SYSTEM (48x48 Grid)
+   FIXED CAT SPRITE SYSTEM (48x48 Grid)
    ========================================================= */
 .cat-container {
   width: 48px;
@@ -214,7 +125,7 @@
   pointer-events: none;
   image-rendering: pixelated; 
   z-index: 9999;
-  will-change: transform, left, top;
+  will-change: left, top, transform;
 }
 
 .cat-sprite {
@@ -222,34 +133,55 @@
   height: 100%;
   background-repeat: no-repeat;
   background-size: auto 100%;
-  backface-visibility: hidden; /* Prevents flickering during transform */
+  /* Fixes visual artifacts during flip */
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
-/* IDLE: 10 frames - background-position: 0 to -480px */
+/* IDLE: 10 frames */
 .state-idle {
   background-image: url('/sprites/IDLE.png');
   animation: play-idle 1.0s steps(10) infinite;
 }
 
-/* WALK: 14 frames - background-position: 0 to -672px */
+/* WALK: 14 frames */
 .state-walk {
   background-image: url('/sprites/WALK.png');
   animation: play-walk 0.8s steps(14) infinite;
 }
 
-/* RUN: 8 frames - background-position: 0 to -384px */
+/* RUN: 8 frames */
 .state-run {
   background-image: url('/sprites/RUN.png');
   animation: play-run 0.5s steps(8) infinite;
 }
 
-@keyframes play-idle { from { background-position: 0; } to { background-position: -480px; } }
-@keyframes play-walk { from { background-position: 0; } to { background-position: -672px; } }
-@keyframes play-run  { from { background-position: 0; } to { background-position: -384px; } }
+/* The 'to' value must be -(FrameCount * FrameWidth) 
+   to jump through the sheet correctly.
+*/
+@keyframes play-idle { from { background-position: 0px; } to { background-position: -480px; } }
+@keyframes play-walk { from { background-position: 0px; } to { background-position: -672px; } }
+@keyframes play-run  { from { background-position: 0px; } to { background-position: -384px; } }
 
 /* =========================================================
-   NOISE & DECORATIVE
+   TEXT / GLOW UTILITIES
    ========================================================= */
+.glow-text {
+  text-shadow: 0 0 20px hsl(var(--accent) / 0.4), 0 0 40px hsl(var(--accent) / 0.15);
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, hsl(var(--accent)) 0%, hsl(155 80% 65%) 50%, hsl(var(--accent)) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmerText 6s linear infinite;
+}
+
+@keyframes shimmerText { to { background-position: 200% center; } }
+
+/* NOISE OVERLAY */
 .noise-overlay::before {
   content: '';
   position: fixed;
@@ -261,11 +193,7 @@
   mix-blend-mode: overlay;
 }
 
-.cv-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 600px;
-}
-
+/* SCROLLBAR */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
@@ -273,15 +201,3 @@
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--accent) / 0.55); }
-
-.section-divider { position: relative; }
-.section-divider::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(120px, 25%, 280px);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, hsl(var(--accent) / 0.35), transparent);
-}

@@ -34,28 +34,30 @@ const AnimatedRoutes = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <ParticleBackground />
-      <CursorCat />
-      <HashRouter>
-        {/* Ensure scroll is at top for every route */}
-        <ScrollToTop />
-        <AnimatedRoutes />
-      </HashRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
-
-function App() {
+const App = () => {
   return (
-    <div className="app-bg min-h-screen">
-      <CustomCursor />
-      {/* Rest of your site content */}
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        {/* Main Wrapper with Background Class */}
+        <div className="app-bg min-h-screen">
+          <Toaster />
+          <Sonner />
+          
+          {/* Custom Inverting Cursor */}
+          <CustomCursor />
+          
+          {/* Particle Layer */}
+          <ParticleBackground />
+          
+          <HashRouter>
+            {/* Ensure scroll is at top for every route */}
+            <ScrollToTop />
+            <AnimatedRoutes />
+          </HashRouter>
+        </div>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
-}
+};
+
 export default App;

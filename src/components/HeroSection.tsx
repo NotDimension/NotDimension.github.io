@@ -4,9 +4,9 @@ import { MapPin, ChevronDown } from "lucide-react";
 const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden grid-bg">
-      {/* Background gradients */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,hsl(210_100%_55%/0.08)_0%,transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_80%,hsl(200_90%_50%/0.04)_0%,transparent_50%)]" />
+      {/* Background gradients - Updated to Green/Cyan */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,hsl(160_50%_15%/0.15)_0%,transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_80%,hsl(185_90%_50%/0.1)_0%,transparent_50%)]" />
 
       {/* Main content */}
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 md:px-12">
@@ -47,7 +47,7 @@ const HeroSection = () => {
               </span>
             </motion.div>
 
-            {/* Name with hover effects */}
+            {/* Name with hover effects - Updated to Lake Cyan/Green */}
             <motion.h1
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -58,8 +58,9 @@ const HeroSection = () => {
               {"NotDimension".split("").map((char, i) => (
                 <motion.span
                   key={i}
-                  whileHover={{ y: -8, scale: 1.3, rotate: 5, color: "#0ea5e9" }}
+                  whileHover={{ y: -8, scale: 1.3, rotate: 5, color: "#00f5ff" }}
                   transition={{ type: "spring", stiffness: 300, damping: 12 }}
+                  className="cursor-default"
                 >
                   {char}
                 </motion.span>

@@ -1,18 +1,46 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, ChevronDown } from "lucide-react";
 
 const HeroSection = () => {
   const name = "NotDimension";
+  const [isLoaded, setIsLoaded] = useState(false);
+  const backgroundPath = "/bg-landscape.jpg";
 
   return (
-    <section className="hero-bg relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Soft accent halo overlays handled by .hero-bg::after */}
-      <div className="absolute inset-0 pointer-events-none" />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#030d08]">
+      {/* 1. HIDDEN LOADER: Triggers the fade-in once the image is in browser cache */}
+      <img
+        src={backgroundPath}
+        onLoad={() => setIsLoaded(true)}
+        className="hidden"
+        alt=""
+      />
+
+      {/* 2. DYNAMIC BACKGROUND: Fades in only when fully loaded */}
+      <AnimatePresence>
+        {isLoaded && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `linear-gradient(to bottom, rgba(3, 13, 8, 0.5), rgba(3, 13, 8, 1)), url(${backgroundPath})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Soft accent halo overlays */}
+      <div className="absolute inset-0 pointer-events-none z-[1] bg-radial-gradient from-accent/5 to-transparent" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
           
-          {/* PROFILE IMAGE — perf-optimized hover (no animated blur, GPU-only transform) */}
+          {/* PROFILE IMAGE */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -20,13 +48,13 @@ const HeroSection = () => {
             className="relative cursor-pointer group"
             style={{ willChange: "transform" }}
           >
-            {/* Static glow halo (no blur recalc on hover) */}
+            {/* Static glow halo */}
             <div
               className="absolute -inset-6 rounded-full bg-accent/15 blur-2xl pointer-events-none transition-opacity duration-500 group-hover:opacity-150"
               style={{ willChange: "opacity", transform: "translateZ(0)" }}
             />
 
-            {/* Image — only transform changes on hover (GPU-accelerated) */}
+            {/* Image container */}
             <div
               className="relative w-56 h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-2 border-accent/30 shadow-[0_0_40px_rgba(16,185,129,0.18)] transition-[border-color,box-shadow] duration-500 group-hover:border-accent/70 group-hover:shadow-[0_0_60px_rgba(16,185,129,0.35)]"
               style={{ transform: "translateZ(0)" }}
@@ -49,7 +77,7 @@ const HeroSection = () => {
           <div className="text-center md:text-left">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
               <span className="inline-block text-xs font-mono text-accent tracking-[0.4em] uppercase bg-accent/10 px-4 py-1.5 rounded-full border border-accent/20 mb-6">
-                Minecraft Server Developer
+                Experienced Admin & Developer
               </span>
             </motion.div>
 
@@ -103,8 +131,7 @@ const HeroSection = () => {
       </div>
       
       {/* SCROLL INDICATOR */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
-        <span className="text-[10px] font-mono tracking-[0.3em] uppercase">Scroll</span>
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30 z-10">
         <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 2, repeat: Infinity }}>
           <ChevronDown className="w-5 h-5 text-accent" />
         </motion.div>

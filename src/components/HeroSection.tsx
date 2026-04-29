@@ -12,21 +12,32 @@ const HeroSection = () => {
       <div className="relative z-10 w-full max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
           
-          {/* PROFILE IMAGE WITH HOVER ANIMATION */}
+          {/* PROFILE IMAGE — perf-optimized hover (no animated blur, GPU-only transform) */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="relative cursor-pointer group"
+            style={{ willChange: "transform" }}
           >
-            <div className="absolute -inset-8 rounded-full bg-accent/20 blur-3xl animate-pulse group-hover:bg-accent/30 transition-colors" />
-            
-            <div className="relative w-56 h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-2 border-accent/30 shadow-[0_0_50px_rgba(16,185,129,0.15)] group-hover:border-accent/60 transition-colors">
+            {/* Static glow halo (no blur recalc on hover) */}
+            <div
+              className="absolute -inset-6 rounded-full bg-accent/15 blur-2xl pointer-events-none transition-opacity duration-500 group-hover:opacity-150"
+              style={{ willChange: "opacity", transform: "translateZ(0)" }}
+            />
+
+            {/* Image — only transform changes on hover (GPU-accelerated) */}
+            <div
+              className="relative w-56 h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-2 border-accent/30 shadow-[0_0_40px_rgba(16,185,129,0.18)] transition-[border-color,box-shadow] duration-500 group-hover:border-accent/70 group-hover:shadow-[0_0_60px_rgba(16,185,129,0.35)]"
+              style={{ transform: "translateZ(0)" }}
+            >
               <img
                 src="/images/profile.png"
                 alt="NotDimension"
-                className="w-full h-full object-cover"
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+                style={{ willChange: "transform" }}
               />
             </div>
 

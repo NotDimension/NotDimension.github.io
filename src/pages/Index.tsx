@@ -22,20 +22,20 @@ const Index = () => {
       {/* Main content fades in after intro */}
       {introComplete && (
         <motion.div
-          className="relative noise-overlay"
+          className="relative noise-overlay app-bg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
         >
           <div className="relative z-10">
             <HeroSection />
-            <AboutSection />
-            <RolesSection />
-            <SkillsSection />
-            <SpotifySection />
-            <LearningSection />
-            <ExploreSection />
-            <ConnectSection />
+            <div className="cv-auto"><AboutSection /></div>
+            <div className="cv-auto section-divider"><RolesSection /></div>
+            <div className="cv-auto section-divider"><SkillsSection /></div>
+            <div className="cv-auto section-divider"><SpotifySection /></div>
+            <div className="cv-auto section-divider"><LearningSection /></div>
+            <div className="cv-auto section-divider"><ExploreSection /></div>
+            <div className="cv-auto section-divider"><ConnectSection /></div>
           </div>
         </motion.div>
       )}

@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* Deep Forest Night - The Base Colors */
+    /* Deep Forest Night - Base Colors */
     --background: 155 45% 3%; 
     --foreground: 155 10% 98%;
 
@@ -32,9 +32,6 @@
     --accent: 155 100% 45%;
     --accent-foreground: 155 60% 4%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 155 10% 98%;
-
     /* Dark Emerald Borders */
     --border: 155 30% 12%;
     --input: 155 30% 12%;
@@ -49,15 +46,24 @@
     @apply border-border;
   }
   body {
-    /* Background Image applied to the WHOLE site */
-    background-image: 
-      linear-gradient(hsl(var(--background) / 0.88), hsl(var(--background) / 0.88)),
-      url('/bg-landscape.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed; /* Image stays put while you scroll */
-    @apply text-foreground font-sans antialiased min-h-screen;
+    /* Clean solid deep green for the whole site */
+    @apply bg-background text-foreground font-sans antialiased min-h-screen;
   }
+}
+
+/* Background Image ONLY for the Hero Section */
+.grid-bg {
+  /* Fades from semi-transparent at top to solid background color at bottom */
+  background-image: 
+    linear-gradient(
+      hsl(var(--background) / 0.82), 
+      hsl(var(--background) / 1)
+    ),
+    url('/bg-landscape.jpg');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  background-repeat: no-repeat;
 }
 
 /* Scrollbar - Deep Green */
@@ -79,7 +85,7 @@
 
 /* Glass card - Deep Emerald version */
 .glass-card {
-  background: hsl(var(--card) / 0.65);
+  background: hsl(var(--card) / 0.7);
   backdrop-filter: blur(14px);
   border: 1px solid hsl(var(--border));
   transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
@@ -89,7 +95,7 @@
   border-color: hsl(var(--accent) / 0.5);
   box-shadow: 0 0 30px hsl(var(--accent) / 0.1);
   transform: translateY(-3px);
-  background: hsl(var(--card) / 0.8);
+  background: hsl(var(--card) / 0.9);
 }
 
 /* Role card - White Accent Glow Top */

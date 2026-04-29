@@ -63,23 +63,9 @@ const ParticleBackground = () => {
     resize();
     window.addEventListener("resize", resize, { passive: true });
 
-    // Pause when hero is offscreen
-    const hero = document.querySelector(".hero-bg");
-    let observer: IntersectionObserver | null = null;
-    if (hero) {
-      observer = new IntersectionObserver(
-        (entries) => {
-          visibleRef.current = entries[0]?.isIntersecting ?? true;
-        },
-        { threshold: 0.01 }
-      );
-      observer.observe(hero);
-    }
-
-    // Pause on tab hidden
+    // Pause on tab hidden (always-on across the whole site otherwise)
     const onVisibility = () => {
-      if (document.hidden) visibleRef.current = false;
-      else if (!hero) visibleRef.current = true;
+      visibleRef.current = !document.hidden;
     };
     document.addEventListener("visibilitychange", onVisibility);
 

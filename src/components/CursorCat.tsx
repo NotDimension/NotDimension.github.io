@@ -1,156 +1,135 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Tiny pixel-art ginger tabby that chases the mouse cursor.
- * - Pure <canvas>, no React re-renders, no per-frame allocations.
- * - Disabled on touch devices, reduced-motion, and small screens.
+ * Pixel-art ginger tabby that chases the mouse cursor.
+ * - Walk animation while moving, idle animation when arrived.
+ * - Slower follow so it lags lazily behind the cursor.
+ * - Disabled on touch devices, small screens, and reduced-motion.
  * - Pauses when tab hidden.
+ *
+ * Sprite frames live in /public/cat/ and are preloaded once.
  */
-const SPRITE_W = 16;
-const SPRITE_H = 12;
-const SCALE = 2; // 16x12 -> 32x24 on screen
 
-// Palette
-const O = "#e8833a"; // orange
-const D = "#a85718"; // dark orange (stripes)
-const W = "#f7f2e8"; // white spots
-const P = "#3a2410"; // outline / paws
-const E = "#1b1208"; // eye
-const N = "#d96b5a"; // nose pink
-const T = null;       // transparent
-
-// Two frames so the tail/legs wiggle while moving.
-// 16x12 grid (col, row). Cat faces RIGHT by default; flipped when moving left.
-const FRAME_A: (string | null)[][] = [
-  [T,T,T,T,T,T,T,T,T,T,T,T,P,T,T,P],
-  [T,T,T,T,T,T,T,T,T,T,T,P,O,P,P,O],
-  [T,T,T,T,T,P,P,P,P,P,P,O,O,O,O,O],
-  [T,T,T,T,P,O,W,O,O,W,O,O,O,O,D,O],
-  [T,T,T,P,O,O,O,O,O,O,O,W,W,O,O,O],
-  [T,T,P,O,E,O,O,N,O,O,E,O,W,W,O,D],
-  [T,T,P,O,O,O,O,O,O,O,O,O,O,O,O,O],
-  [T,T,P,O,W,O,D,O,O,D,O,O,W,O,D,O],
-  [T,T,T,P,O,O,O,O,O,O,O,O,O,O,O,T],
-  [T,T,T,P,O,O,O,O,O,O,O,O,O,O,T,T],
-  [T,T,T,P,P,T,P,P,T,T,P,P,T,P,T,T],
-  [T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T],
-];
-
-const FRAME_B: (string | null)[][] = [
-  [T,T,T,T,T,T,T,T,T,T,T,T,P,T,T,T],
-  [T,T,T,T,T,T,T,T,T,T,T,P,O,P,P,T],
-  [T,T,T,T,T,P,P,P,P,P,P,O,O,O,O,P],
-  [T,T,T,T,P,O,W,O,O,W,O,O,O,O,D,O],
-  [T,T,T,P,O,O,O,O,O,O,O,W,W,O,O,O],
-  [T,T,P,O,E,O,O,N,O,O,E,O,W,W,O,D],
-  [T,T,P,O,O,O,O,O,O,O,O,O,O,O,O,O],
-  [T,T,P,O,W,O,D,O,O,D,O,O,W,O,D,O],
-  [T,T,T,P,O,O,O,O,O,O,O,O,O,O,O,T],
-  [T,T,T,T,P,O,O,O,O,O,O,O,O,O,T,T],
-  [T,T,T,P,T,P,P,T,P,P,T,T,P,P,T,T],
-  [T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T],
-];
-
-function paintFrame(ctx: CanvasRenderingContext2D, frame: (string | null)[][]) {
-  ctx.clearRect(0, 0, SPRITE_W * SCALE, SPRITE_H * SCALE);
-  for (let y = 0; y < SPRITE_H; y++) {
-    const row = frame[y];
-    for (let x = 0; x < SPRITE_W; x++) {
-      const c = row[x];
-      if (!c) continue;
-      ctx.fillStyle = c;
-      ctx.fillRect(x * SCALE, y * SCALE, SCALE, SCALE);
-    }
-  }
-}
+const WALK_FRAMES = 8;
+const IDLE_FRAMES = 6;
+const SPRITE_PX = 64;       // source frame size
+const DISPLAY_PX = 56;      // rendered size on screen
+const FOLLOW_TRAIL = 70;    // px the cat trails behind the cursor
 
 const CursorCat = () => {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const canvasARef = useRef<HTMLCanvasElement>(null);
-  const canvasBRef = useRef<HTMLCanvasElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Don't show on touch / small screens / reduced motion
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
     const isSmall = window.innerWidth < 768;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (isTouch || isSmall || reduceMotion) return;
 
     const wrap = wrapRef.current;
-    const ca = canvasARef.current;
-    const cb = canvasBRef.current;
-    if (!wrap || !ca || !cb) return;
+    const img = imgRef.current;
+    if (!wrap || !img) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    [ca, cb].forEach((c) => {
-      c.width = SPRITE_W * SCALE * dpr;
-      c.height = SPRITE_H * SCALE * dpr;
-      c.style.width = `${SPRITE_W * SCALE}px`;
-      c.style.height = `${SPRITE_H * SCALE}px`;
-      const cx = c.getContext("2d");
-      if (!cx) return;
-      cx.imageSmoothingEnabled = false;
-      cx.scale(dpr, dpr);
-    });
-    paintFrame(ca.getContext("2d")!, FRAME_A);
-    paintFrame(cb.getContext("2d")!, FRAME_B);
+    // Preload all frames into <img> objects so swapping src is instant.
+    const walkImgs: HTMLImageElement[] = [];
+    const idleImgs: HTMLImageElement[] = [];
+    for (let i = 0; i < WALK_FRAMES; i++) {
+      const im = new Image();
+      im.src = `/cat/walk_${i}.png`;
+      walkImgs.push(im);
+    }
+    for (let i = 0; i < IDLE_FRAMES; i++) {
+      const im = new Image();
+      im.src = `/cat/idle_${i}.png`;
+      idleImgs.push(im);
+    }
 
-    // Cat trails the cursor with offset so it's "chasing", not under it
+    // Position state
     let mx = window.innerWidth / 2;
     let my = window.innerHeight / 2;
-    let cx = mx - 80;
-    let cy = my + 60;
+    let cx = mx - 120;
+    let cy = my + 80;
     let facing: 1 | -1 = 1;
-    let frameToggle = 0;
+
+    // Animation state
+    let mode: "walk" | "idle" = "idle";
+    let frame = 0;
     let frameAccum = 0;
     let lastT = performance.now();
     let visible = true;
     let raf = 0;
+    let currentSrc = "";
 
     const onMove = (e: MouseEvent) => {
       mx = e.clientX;
       my = e.clientY;
     };
-    const onVis = () => { visible = !document.hidden; };
+    const onVis = () => {
+      visible = !document.hidden;
+      lastT = performance.now();
+    };
     window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("visibilitychange", onVis);
 
-    const W_OFFSET = SPRITE_W * SCALE / 2;
-    const H_OFFSET = SPRITE_H * SCALE / 2;
+    const HALF = DISPLAY_PX / 2;
 
     const tick = (t: number) => {
       const dt = Math.min((t - lastT) / 16.6667, 3);
       lastT = t;
-      if (!visible) { raf = requestAnimationFrame(tick); return; }
-
-      // Target: a bit behind the cursor (so the cat chases)
-      const targetX = mx - 40;
-      const targetY = my + 30;
-      const dx = targetX - cx;
-      const dy = targetY - cy;
-      const dist = Math.hypot(dx, dy);
-
-      // Smooth follow (lerp), faster when far away
-      const ease = Math.min(0.18, 0.06 + dist * 0.0015);
-      cx += dx * ease * dt * 0.6;
-      cy += dy * ease * dt * 0.6;
-
-      if (Math.abs(dx) > 4) facing = dx > 0 ? 1 : -1;
-
-      // Animate frame only when moving
-      const moving = dist > 6;
-      if (moving) {
-        frameAccum += dt;
-        if (frameAccum > 6) { frameToggle ^= 1; frameAccum = 0; }
+      if (!visible) {
+        raf = requestAnimationFrame(tick);
+        return;
       }
 
-      const tx = cx - W_OFFSET;
-      const ty = cy - H_OFFSET;
+      // Follow target lags behind the cursor in the direction it last moved
+      const dxToCursor = mx - cx;
+      const dyToCursor = my - cy;
+      const distToCursor = Math.hypot(dxToCursor, dyToCursor) || 1;
+      const trailX = mx - (dxToCursor / distToCursor) * FOLLOW_TRAIL;
+      const trailY = my - (dyToCursor / distToCursor) * FOLLOW_TRAIL;
+
+      const dx = trailX - cx;
+      const dy = trailY - cy;
+      const dist = Math.hypot(dx, dy);
+
+      // Slower lerp — the cat is lazy.
+      const ease = Math.min(0.07, 0.015 + dist * 0.0006);
+      cx += dx * ease * dt;
+      cy += dy * ease * dt;
+
+      if (Math.abs(dx) > 6) facing = dx > 0 ? 1 : -1;
+
+      // Mode: walk if it has meaningful distance to cover, otherwise idle.
+      const newMode: "walk" | "idle" = dist > 8 ? "walk" : "idle";
+      if (newMode !== mode) {
+        mode = newMode;
+        frame = 0;
+        frameAccum = 0;
+      }
+
+      // Frame timing — slower for idle (subtle breathing), faster for walking.
+      const frameRate = mode === "walk" ? 7 : 16; // ticks per frame
+      frameAccum += dt;
+      if (frameAccum >= frameRate) {
+        frameAccum = 0;
+        const total = mode === "walk" ? WALK_FRAMES : IDLE_FRAMES;
+        frame = (frame + 1) % total;
+      }
+
+      const src =
+        mode === "walk"
+          ? walkImgs[frame].src
+          : idleImgs[frame].src;
+      if (src !== currentSrc) {
+        img.src = src;
+        currentSrc = src;
+      }
+
+      const tx = cx - HALF;
+      const ty = cy - HALF;
       wrap.style.transform = `translate3d(${tx}px, ${ty}px, 0) scaleX(${facing})`;
-      ca.style.opacity = frameToggle === 0 ? "1" : "0";
-      cb.style.opacity = frameToggle === 1 ? "1" : "0";
 
       raf = requestAnimationFrame(tick);
     };
@@ -169,22 +148,23 @@ const CursorCat = () => {
       aria-hidden="true"
       className="fixed top-0 left-0 pointer-events-none z-[60]"
       style={{
-        width: SPRITE_W * SCALE,
-        height: SPRITE_H * SCALE,
+        width: DISPLAY_PX,
+        height: DISPLAY_PX,
         willChange: "transform",
-        imageRendering: "pixelated",
-        filter: "drop-shadow(0 2px 3px rgba(0,0,0,0.5))",
+        filter: "drop-shadow(0 3px 4px rgba(0,0,0,0.45))",
       }}
     >
-      <canvas
-        ref={canvasARef}
-        className="absolute inset-0"
-        style={{ imageRendering: "pixelated", transition: "opacity 60ms linear" }}
-      />
-      <canvas
-        ref={canvasBRef}
-        className="absolute inset-0"
-        style={{ imageRendering: "pixelated", transition: "opacity 60ms linear", opacity: 0 }}
+      <img
+        ref={imgRef}
+        alt=""
+        width={DISPLAY_PX}
+        height={DISPLAY_PX}
+        style={{
+          width: DISPLAY_PX,
+          height: DISPLAY_PX,
+          imageRendering: "pixelated",
+          display: "block",
+        }}
       />
     </div>
   );

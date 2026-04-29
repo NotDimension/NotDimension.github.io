@@ -20,7 +20,7 @@ const archivedProjects = [
   { name: "Nebular SMP", role: "Co-Owner", members: "200", icon: "/images/icons/nebular.png", note: "Left in October 2025" },
   { name: "Discord Collective", role: "Manager", members: "60+", icon: "/images/icons/collective.png", note: "Innactive server." },
   { name: "Shade Network", role: "Owner", members: "350", icon: "/images/icons/shade.png", note: "Left Early April 2026" },
-  { name: "Prism SMP", role: "Owner/Staff Manager", members: "700", icon: "/images/icons/prism.png", note: "Left Early April 2026" },
+  { name: "Prism SMP (Now AxonMC)", role: "Owner/Staff Manager", members: "700", icon: "/images/icons/axon.png", note: "Left Early April 2026" },
   { name: "Echo Network", role: "Helper", members: "4k", icon: "/images/icons/echo.png", note: "Removed due to inactivity." },
 ];
 

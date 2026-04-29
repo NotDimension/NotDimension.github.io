@@ -42,7 +42,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
 
           {/* Name Reveal - Updated Hover to Emerald Green */}
           <motion.h1
-            className="flex flex-wrap justify-center text-4xl md:text-6xl font-bold font-mono gap-1 text-primary"
+            className="flex flex-wrap justify-center text-4xl md:text-6xl font-bold font-mono gap-1 text-white"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -53,7 +53,8 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 20 }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
-                whileHover={{ scale: 1.3, y: -5, color: "#10b981" }} // Emerald Green Hover
+                whileHover={{ scale: 1.3, y: -5, color: "hsl(155 100% 45%)" }}
+                style={{ display: "inline-block" }}
               >
                 {char}
               </motion.span>

@@ -1,32 +1,32 @@
 import React, { useEffect, useState } from 'react';
 
 const CustomCursor = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: -100, y: -100 }); // Start off-screen
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Hide the real cursor
-    document.body.style.cursor = 'none';
-
     const moveCursor = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY });
+      if (!isVisible) setIsVisible(true);
     };
 
+    // Listen for mouse movement
     window.addEventListener('mousemove', moveCursor);
 
     return () => {
-      // Restore the cursor if component unmounts
-      document.body.style.cursor = 'default';
       window.removeEventListener('mousemove', moveCursor);
     };
-  }, []);
+  }, [isVisible]);
+
+  if (!isVisible) return null;
 
   return (
     <div
       className="custom-cursor"
       style={{
-        left: position.x,
-        top: position.y,
-        transform: 'translate(-50%, -50%)', // Centers the circle on the tip
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        transform: 'translate(-50%, -50%)',
       }}
     />
   );

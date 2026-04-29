@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* Deep Forest Night - The Base Colors */
+    /* Deep Forest Night */
     --background: 155 45% 3%; 
     --foreground: 155 10% 98%;
 
@@ -14,94 +14,82 @@
     --card: 155 40% 5%;
     --card-foreground: 155 10% 98%;
 
-    --popover: 155 40% 5%;
-    --popover-foreground: 155 10% 98%;
-
-    /* Bright White/Mint for Primary text */
     --primary: 155 20% 98%; 
-    --primary-foreground: 155 60% 4%;
-
-    /* Muted Forest Green - Secondary */
-    --secondary: 155 35% 10%;
-    --secondary-foreground: 155 20% 90%;
-
-    --muted: 155 25% 8%;
-    --muted-foreground: 155 10% 55%;
-
-    /* Vibrant Emerald - Accent Glows */
-    --accent: 155 100% 45%;
-    --accent-foreground: 155 60% 4%;
-
-    /* Dark Emerald Borders */
-    --border: 155 30% 12%;
-    --input: 155 30% 12%;
-    --ring: 155 100% 45%;
-
-    --radius: 0.75rem;
+    --accent: 155 100% 45%; /* Vibrant Emerald */
+    --border: 155 30% 18%;
+    --radius: 1rem;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
   body {
-    /* Solid background for the whole site with a permanent central glow */
-    background: radial-gradient(circle at 50% 50%, hsl(155 100% 45% / 0.05) 0%, transparent 70%), 
-                hsl(var(--background));
-    background-attachment: fixed;
+    /* Solid base color for the whole site */
+    background-color: hsl(var(--background));
     @apply text-foreground font-sans antialiased min-h-screen;
   }
 }
 
-/* Background Image ONLY for the Hero Section */
+/* 1. HERO BACKGROUND SECTION */
 .grid-bg {
-  /* Fades to solid background color at the bottom to prevent bleeding into next sections */
+  /* Ensure the filename image(3).jpg is in your /public folder */
   background-image: 
     linear-gradient(
-      hsl(var(--background) / 0.7), 
-      hsl(var(--background) / 1)
+      to bottom,
+      hsl(var(--background) / 0.7) 0%, 
+      hsl(var(--background) / 1) 100%
     ),
-    url('/bg-landscape.jpg');
+    url('/image(3).jpg'); 
   background-size: cover;
   background-position: center;
-  position: relative;
   background-repeat: no-repeat;
+  position: relative;
+  z-index: 1;
 }
 
-/* Default Card Glow & Animation */
-.glass-card {
-  @apply relative overflow-hidden transition-all duration-500 ease-out;
-  background: hsl(var(--card) / 0.6);
+/* 2. UNIVERSAL CARD STYLING (Borders & Glows) */
+/* This targets your Roles, Projects, About, and Contact cards */
+.glass-card, 
+.role-card,
+section div[class*="bg-card"], 
+section div[class*="rounded-"] {
+  @apply relative transition-all duration-500 ease-out;
+  background: hsl(var(--card) / 0.6) !important;
   backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--accent) / 0.2);
-  /* Default subtle emerald glow */
+  
+  /* The Emerald Border - Forced Visibility */
+  border: 1px solid hsl(var(--accent) / 0.3) !important;
   box-shadow: 0 0 20px hsl(var(--accent) / 0.05);
 }
 
-/* Card Hover Animation */
-.glass-card:hover {
+/* 3. HOVER ANIMATIONS */
+.glass-card:hover, 
+.role-card:hover,
+section div[class*="bg-card"]:hover,
+section div[class*="rounded-"]:hover {
   @apply -translate-y-1;
-  border-color: hsl(var(--accent) / 0.5);
-  background: hsl(var(--card) / 0.85);
-  /* Intense emerald hover glow */
-  box-shadow: 0 0 30px hsl(var(--accent) / 0.15), 0 10px 40px hsl(0 0% 0% / 0.5);
+  border-color: hsl(var(--accent) / 0.8) !important;
+  background: hsl(var(--card) / 0.8) !important;
+  box-shadow: 0 0 30px hsl(var(--accent) / 0.2), 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
-/* Green & White Glow Effects */
+/* 4. THE SECTION GLOW */
+/* Adds that soft emerald light behind the content as you scroll */
+section:not(.grid-bg) {
+  background: radial-gradient(
+    circle at center, 
+    hsl(155 100% 45% / 0.04) 0%, 
+    transparent 70%
+  );
+}
+
+/* 5. ADDITIONAL UI GLOWS */
 .glow-text {
   text-shadow: 0 0 15px hsl(var(--primary) / 0.4), 0 0 30px hsl(var(--accent) / 0.2);
-  color: hsl(var(--primary));
 }
 
-.glow-border {
-  box-shadow: 0 0 20px hsl(var(--accent) / 0.15), inset 0 0 10px hsl(var(--accent) / 0.05);
-  border-color: hsl(var(--accent) / 0.3);
-}
-
-/* Timeline - Emerald Glow */
 .timeline-line {
-  background: linear-gradient(to bottom, hsl(var(--accent) / 0.5), hsl(var(--accent) / 0.1));
+  background: linear-gradient(to bottom, hsl(var(--accent) / 0.5), transparent);
 }
 
 .timeline-dot {
@@ -109,19 +97,24 @@
   box-shadow: 0 0 15px hsl(var(--accent) / 0.6);
 }
 
-/* Noise overlay for that grainy forest texture */
+/* Scrollbar Styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { 
+  background: hsl(var(--accent) / 0.2); 
+  border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { 
+  background: hsl(var(--accent) / 0.5); 
+}
+
+/* Noise overlay */
 .noise-overlay::before {
   content: '';
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  opacity: 0.03;
+  opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 50;
 }
-
-/* Scrollbar - Deep Green */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--accent)); }

@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const MouseChaser = () => {
+const CursorCat = () => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [state, setState] = useState('idle');
   const [facing, setFacing] = useState(1);
   
-  // Refs to track physics without triggering unnecessary re-renders
   const lastMousePos = useRef({ x: 0, y: 0, time: Date.now() });
   const velocity = useRef(0);
 
@@ -18,32 +17,33 @@ const MouseChaser = () => {
         const dx = e.clientX - lastMousePos.current.x;
         const dy = e.clientY - lastMousePos.current.y;
         
-        // Calculate Speed (Distance / Time)
+        // Calculate velocity (pixels per millisecond)
         const distance = Math.sqrt(dx * dx + dy * dy);
         velocity.current = distance / dt;
 
-        // 1. Determine Direction (Face Left or Right)
+        // DIRECTION LOGIC:
+        // If dx is positive, mouse is moving right. 
+        // If the cat faces right by default in the sprite, set facing to 1.
+        // If it walks away from the mouse, change these to -1 and 1.
         if (dx > 1) setFacing(1);
         else if (dx < -1) setFacing(-1);
 
-        // 2. Set State based on Speed threshold
-        // 0.0 to 0.1: Idle | 0.1 to 0.5: Walk | > 0.5: Run
+        // SPEED LOGIC:
         if (velocity.current < 0.1) {
           setState('idle');
-        } else if (velocity.current < 0.5) {
+        } else if (velocity.current < 0.6) {
           setState('walk');
         } else {
           setState('run');
         }
 
-        // 3. Update position
         setPos({ x: e.clientX, y: e.clientY });
         lastMousePos.current = { x: e.clientX, y: e.clientY, time: now };
       }
     };
 
-    // Listen for mouse stop (velocity check doesn't fire if mouse doesn't move)
-    const stopCheck = setInterval(() => {
+    // Idle Timer: If mouse stops moving for 100ms, force Idle state
+    const idleTimer = setInterval(() => {
       if (Date.now() - lastMousePos.current.time > 100) {
         setState('idle');
       }
@@ -52,7 +52,7 @@ const MouseChaser = () => {
     window.addEventListener('mousemove', handleMouseMove);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      clearInterval(stopCheck);
+      clearInterval(idleTimer);
     };
   }, []);
 
@@ -62,8 +62,10 @@ const MouseChaser = () => {
       style={{ 
         left: pos.x, 
         top: pos.y,
+        // translate(-50%, -50%) centers the 48px box on your cursor tip
         transform: `translate(-50%, -50%) scaleX(${facing})`,
-        transition: 'left 0.15s ease-out, top 0.15s ease-out'
+        // Transition creates the "chase" lag
+        transition: 'left 0.12s ease-out, top 0.12s ease-out'
       }}
     >
       <div className={`cat-sprite state-${state}`} />
@@ -71,4 +73,4 @@ const MouseChaser = () => {
   );
 };
 
-export default MouseChaser;
+export default CursorCat;

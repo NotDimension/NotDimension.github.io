@@ -7,7 +7,7 @@ interface Particle {
   vy: number;
   size: number;
   opacity: number;
-  color: string; // Added color property to vary between green/white
+  color: string;
 }
 
 const ParticleBackground = () => {
@@ -29,22 +29,20 @@ const ParticleBackground = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    // Init particles with color variance
     const count = Math.min(80, Math.floor((window.innerWidth * window.innerHeight) / 15000));
     particlesRef.current = Array.from({ length: count }, () => {
-      // Randomly pick between White and Lake Cyan/Green
-      const isWhite = Math.random() > 0.5;
+      const isWhite = Math.random() > 0.6;
       const color = isWhite 
-        ? `160, 20%, 98%`  // White/Mint
-        : `185, 90%, 60%`; // Lake Cyan
+        ? `155, 10%, 98%`  // Bright White
+        : `155, 100%, 40%`; // Deep Emerald
 
       return {
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        size: Math.random() * 1.8 + 0.5,
+        opacity: Math.random() * 0.4 + 0.1,
         color: color,
       };
     });
@@ -67,7 +65,6 @@ const ParticleBackground = () => {
         if (p.y < 0) p.y = canvas.height;
         if (p.y > canvas.height) p.y = 0;
 
-        // Mouse repulsion
         const dx = p.x - mouse.x;
         const dy = p.y - mouse.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -77,18 +74,15 @@ const ParticleBackground = () => {
           p.vy += (dy / dist) * force * 0.02;
         }
 
-        // Damping
         p.vx *= 0.99;
         p.vy *= 0.99;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        // Using the per-particle color assigned during init
         ctx.fillStyle = `hsla(${p.color}, ${p.opacity})`;
         ctx.fill();
       }
 
-      // Draw connections
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
@@ -98,14 +92,12 @@ const ParticleBackground = () => {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            // Connections use a very faint version of the first particle's color
-            ctx.strokeStyle = `hsla(${particles[i].color}, ${0.08 * (1 - dist / 150)})`;
+            ctx.strokeStyle = `hsla(155, 100%, 40%, ${0.05 * (1 - dist / 150)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         }
       }
-
       animRef.current = requestAnimationFrame(animate);
     };
     animate();
@@ -121,7 +113,7 @@ const ParticleBackground = () => {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.8 }} // Increased opacity slightly to see the white better
+      style={{ opacity: 0.7 }}
     />
   );
 };

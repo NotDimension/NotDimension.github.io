@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import ParticleBackground from "@/components/ParticleBackground";
 
 interface IntroProps {
   onComplete: () => void;

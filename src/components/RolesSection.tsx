@@ -30,7 +30,7 @@ const previousRoles: Role[] = [
   { name: "Nebular SMP", role: "Overseer/Co-Owner", members: "200", icon: "/images/icons/nebular.png", discord: "https://discord.gg/YYwWMXxKAz", description: "Oversaw server operations and community growth." },
   { name: "Discord Collective", role: "Manager", members: "120", icon: "/images/icons/collective.png", discord: "https://discord.gg/nUMJ52Pycj", description: "A server focused on community and events with engaged members." },
   { name: "Shade Network", role: "Owner", members: "350", icon: "/images/icons/shade.png", discord: "https://discord.gg/yRSHNEnb7Z", description: "A community-oriented Network with Economy and Lifesteal gamemodes." },
-  { name: "Prism SMP", role: "Staff Manager", members: "800", icon: "/images/icons/prism.png", discord: "https://discord.gg/cVBDxNxP5c", description: "Led a thriving SMP community with custom gameplay systems." },
+  { name: "Prism SMP (Now AxonMC)", role: "Owner/Staff Manager", members: "800", icon: "/images/icons/axon.png", discord: "https://discord.gg/cVBDxNxP5c", description: "Led a thriving SMP community with custom gameplay systems." },
   { name: "Echo Network", role: "Helper", members: "4k", icon: "/images/icons/echo.png", discord: "https://discord.gg/fVZPJuEcaQ", description: "A economy server based in NA! Helped with tickets and reports." },
 ];
 

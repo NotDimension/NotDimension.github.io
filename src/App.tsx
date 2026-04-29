@@ -14,6 +14,7 @@ import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import CustomCursor from './components/CustomCursor';
 
 const queryClient = new QueryClient();
 
@@ -49,4 +50,12 @@ const App = () => (
   </QueryClientProvider>
 );
 
+function App() {
+  return (
+    <div className="app-bg min-h-screen">
+      <CustomCursor />
+      {/* Rest of your site content */}
+    </div>
+  );
+}
 export default App;

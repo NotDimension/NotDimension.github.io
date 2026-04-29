@@ -4,6 +4,7 @@ import PageHeader from "@/components/PageHeader";
 
 const liveProjects = [
   { name: "ShadySMP", role: "Co‑Owner", members: "450+", icon: "/images/icons/shady.png", discord: "https://discord.gg/Jg48d8xbcD", desc: "A community‑oriented SMP with custom plugins, events, and a growing player base." },
+  { name: "SMPFinder", role: "Admin/SRA", members: "45k", icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/pQ8tvD533J", desc: "Discover the best Minecraft SMP servers with SMP Finder." },
   { name: "Discord Collective", role: "Manager", members: "60+", icon: "/images/icons/collective.png", discord: "https://discord.gg/nUMJ52Pycj", desc: "A server focused on Community and Events with engaged members." },
   { name: "Shade Network", role: "Owner", members: "350", icon: "/images/icons/shade.png", discord: "https://discord.gg/yRSHNEnb7Z", description: "A community-oriented Network with Economy and Lifesteal gamemodes." },
   { name: "Prism SMP", role: "Staff Manager", members: "700", icon: "/images/icons/prism.png", discord: "https://discord.gg/8Tjt9W4q5N", description: "A community-oriented server." },
@@ -19,7 +20,6 @@ const archivedProjects = [
   { name: "SteakySMP", role: "Co‑Owner", members: "1.5k", icon: "/images/icons/steaky.png", note: "Left in October 2025" },
   { name: "ShatterMC", role: "Senior Admin", members: "260", icon: "/images/icons/shatter.png", note: "Left in November 2025" },
   { name: "BonkMC", role: "Moderator", members: "4.6k", icon: "/images/icons/bonk.png", note: "Left in December 2025" },
-  { name: "SMPFinder", role: "Senior Moderator", members: "40k", icon: "/images/icons/smpfinder.png", note: "Left in December 2025" },
   { name: "Nebular SMP", role: "Co-Owner", members: "200", icon: "/images/icons/nebular.png", note: "Left in October 2025" },
 ];
 

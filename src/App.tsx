@@ -8,6 +8,7 @@ import { AnimatePresence } from "framer-motion";
 
 import ParticleBackground from "@/components/ParticleBackground";
 import ScrollToTop from "@/components/ScrollToTop";
+import CursorCat from '@/components/MouseChaser';
 
 import Index from "./pages/Index";
 import Projects from "./pages/Projects";

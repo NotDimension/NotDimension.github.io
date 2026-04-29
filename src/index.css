@@ -1,4 +1,4 @@
-=@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -16,9 +16,11 @@
 
 @layer base {
   body {
-    /* Solid background color for the rest of the site */
     background-color: hsl(var(--background));
     @apply text-foreground font-sans antialiased min-h-screen;
+    
+    /* Performance Tweak: Forces GPU acceleration for smooth canvas scrolling */
+    transform: translateZ(0);
   }
 }
 
@@ -29,7 +31,6 @@
   /* Fixes the image so it stays put while content moves over it */
   background-attachment: fixed; 
   background-image: 
-    /* This gradient handles the fade to the solid color at the bottom */
     linear-gradient(
       to bottom, 
       rgba(3, 13, 8, 0.4) 0%, 
@@ -40,6 +41,9 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  
+  /* Performance Tweak: Isolates paint rendering to this container only */
+  contain: layout style;
 }
 
 /* 2. UNIVERSAL CARD BORDERS (Fixes Roles, Projects, Lists, etc.) */
@@ -48,42 +52,125 @@
 section div[class*="bg-card"],
 section div[class*="rounded-xl"],
 section div[class*="border"] {
-  @apply relative transition-all duration-500 ease-out;
+  @apply relative overflow-hidden;
   background: hsl(var(--card) / 0.7) !important;
   backdrop-filter: blur(12px);
   border: 1px solid hsl(var(--accent) / 0.3) !important;
   box-shadow: 0 0 20px hsl(var(--accent) / 0.05);
+  
+  /* Smooth easing for interactions without standard layout stutter */
+  transition: transform 0.4s cubic-bezier(0.1, 1, 0.1, 1), 
+              border-color 0.4s ease, 
+              box-shadow 0.4s ease;
+              
+  /* Performance Tweak: Tells the browser to prepare the GPU for these specific changes */
+  will-change: transform, border-color, box-shadow;
 }
 
-/* 3. HOVER ANIMATIONS */
+/* Hover Animations */
 .glass-card:hover, 
 .role-card:hover,
 section div[class*="bg-card"]:hover,
 section div[class*="rounded-xl"]:hover {
-  @apply -translate-y-1;
+  /* Using translateZ triggers hardware acceleration for standard translates */
+  transform: translateY(-5px) translateZ(0);
   border-color: hsl(var(--accent) / 0.8) !important;
   box-shadow: 0 0 35px hsl(var(--accent) / 0.15), 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
-/* 4. SECTION GLOWS */
+/* Card Subtle Shimmer Reflection (Pure CSS Animation) */
+.glass-card::after,
+.role-card::after {
+  content: '';
+  position: absolute;
+  top: -100%; left: -100%; width: 200%; height: 200%;
+  background: linear-gradient(
+    45deg, 
+    transparent 0%, 
+    rgba(16, 185, 129, 0.03) 45%, 
+    rgba(16, 185, 129, 0.08) 50%, 
+    transparent 55%
+  );
+  transform: rotate(45deg);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.glass-card:hover::after,
+.role-card:hover::after {
+  transform: rotate(45deg) translate(20%, 20%);
+}
+
+/* 3. PERFORMANCE-OPTIMIZED SECTION GLOWS */
 section:not(.grid-bg) {
-  background: radial-gradient(circle at center, hsl(155 100% 45% / 0.06) 0%, transparent 75%);
+  position: relative;
+  /* Performance Tweak: Skips rendering offscreen content until needed */
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px;
 }
 
-/* UI Details */
+section:not(.grid-bg)::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%; width: 70%; height: 70%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, hsl(155 100% 45% / 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+  
+  /* Animation: Subtle breathing background glow */
+  animation: glowBreath 10s ease-in-out infinite alternate;
+}
+
+@keyframes glowBreath {
+  0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.7; }
+  100% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+}
+
+/* 4. EXTRA UI ANIMATIONS */
+
+/* Breathing Text Glow (Add this class to important headings) */
 .glow-text {
-  text-shadow: 0 0 15px hsl(var(--accent) / 0.4);
+  animation: textPulse 4s ease-in-out infinite alternate;
+  will-change: text-shadow;
 }
 
+@keyframes textPulse {
+  0% { text-shadow: 0 0 10px hsl(var(--accent) / 0.2); }
+  100% { text-shadow: 0 0 25px hsl(var(--accent) / 0.5), 0 0 35px hsl(var(--accent) / 0.2); }
+}
+
+/* Continuous Floating (Add .floating to any icon or small element) */
+.floating {
+  animation: float 5s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) translateZ(0); }
+  50% { transform: translateY(-8px) translateZ(0); }
+  100% { transform: translateY(0px) translateZ(0); }
+}
+
+/* Noise overlay texture */
 .noise-overlay::before {
   content: '';
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  opacity: 0.02;
+  opacity: 0.015;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 50;
 }
 
+/* Scrollbar Customization */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: hsl(var(--accent) / 0.2); border-radius: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { 
+  background: hsl(var(--accent) / 0.2); 
+  border-radius: 10px; 
+  transition: background 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover { 
+  background: hsl(var(--accent) / 0.5); 
+}

@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* Deep Forest Night - Base Colors */
+    /* Deep Forest Night - The Base Colors */
     --background: 155 45% 3%; 
     --foreground: 155 10% 98%;
 
@@ -46,17 +46,20 @@
     @apply border-border;
   }
   body {
-    /* Clean solid deep green for the whole site */
-    @apply bg-background text-foreground font-sans antialiased min-h-screen;
+    /* Solid background for the whole site with a permanent central glow */
+    background: radial-gradient(circle at 50% 50%, hsl(155 100% 45% / 0.05) 0%, transparent 70%), 
+                hsl(var(--background));
+    background-attachment: fixed;
+    @apply text-foreground font-sans antialiased min-h-screen;
   }
 }
 
 /* Background Image ONLY for the Hero Section */
 .grid-bg {
-  /* Fades from semi-transparent at top to solid background color at bottom */
+  /* Fades to solid background color at the bottom to prevent bleeding into next sections */
   background-image: 
     linear-gradient(
-      hsl(var(--background) / 0.82), 
+      hsl(var(--background) / 0.7), 
       hsl(var(--background) / 1)
     ),
     url('/bg-landscape.jpg');
@@ -66,11 +69,24 @@
   background-repeat: no-repeat;
 }
 
-/* Scrollbar - Deep Green */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--accent)); }
+/* Default Card Glow & Animation */
+.glass-card {
+  @apply relative overflow-hidden transition-all duration-500 ease-out;
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--accent) / 0.2);
+  /* Default subtle emerald glow */
+  box-shadow: 0 0 20px hsl(var(--accent) / 0.05);
+}
+
+/* Card Hover Animation */
+.glass-card:hover {
+  @apply -translate-y-1;
+  border-color: hsl(var(--accent) / 0.5);
+  background: hsl(var(--card) / 0.85);
+  /* Intense emerald hover glow */
+  box-shadow: 0 0 30px hsl(var(--accent) / 0.15), 0 10px 40px hsl(0 0% 0% / 0.5);
+}
 
 /* Green & White Glow Effects */
 .glow-text {
@@ -83,46 +99,6 @@
   border-color: hsl(var(--accent) / 0.3);
 }
 
-/* Glass card - Deep Emerald version */
-.glass-card {
-  background: hsl(var(--card) / 0.7);
-  backdrop-filter: blur(14px);
-  border: 1px solid hsl(var(--border));
-  transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-card:hover {
-  border-color: hsl(var(--accent) / 0.5);
-  box-shadow: 0 0 30px hsl(var(--accent) / 0.1);
-  transform: translateY(-3px);
-  background: hsl(var(--card) / 0.9);
-}
-
-/* Role card - White Accent Glow Top */
-.role-card {
-  background: hsl(var(--card) / 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid hsl(var(--border));
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.role-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent);
-  opacity: 0.3;
-}
-
-.role-card:hover {
-  border-color: hsl(var(--primary) / 0.4);
-  box-shadow: 0 15px 40px hsl(0 0% 0% / 0.4);
-  transform: translateY(-4px);
-}
-
 /* Timeline - Emerald Glow */
 .timeline-line {
   background: linear-gradient(to bottom, hsl(var(--accent) / 0.5), hsl(var(--accent) / 0.1));
@@ -133,7 +109,7 @@
   box-shadow: 0 0 15px hsl(var(--accent) / 0.6);
 }
 
-/* Noise overlay */
+/* Noise overlay for that grainy forest texture */
 .noise-overlay::before {
   content: '';
   position: fixed;
@@ -144,12 +120,8 @@
   z-index: 50;
 }
 
-/* Page enter animation */
-.page-container {
-  animation: page-enter 0.6s ease-out;
-}
-
-@keyframes page-enter {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* Scrollbar - Deep Green */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--accent)); }

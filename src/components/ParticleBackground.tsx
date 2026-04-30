@@ -56,15 +56,15 @@ const ParticleBackground = () => {
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const cap = lowEnd ? (w < 768 ? 18 : 28) : w < 768 ? 28 : 55;
-      const target = Math.min(cap, Math.floor((w * h) / (lowEnd ? 45000 : 28000)));
+      const cap = lowEnd ? (w < 768 ? 28 : 50) : w < 768 ? 50 : 95;
+      const target = Math.min(cap, Math.floor((w * h) / (lowEnd ? 30000 : 18000)));
       particlesRef.current = Array.from({ length: target }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.18,
-        vy: (Math.random() - 0.5) * 0.18,
-        size: Math.random() * 1.6 + 0.4,
-        baseOpacity: Math.random() * 0.35 + 0.1,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        size: Math.random() * 2.0 + 0.6,
+        baseOpacity: Math.random() * 0.55 + 0.3,
       }));
     };
     resize();
@@ -102,8 +102,11 @@ const ParticleBackground = () => {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(155, 100%, 60%, ${p.baseOpacity})`;
+        ctx.fillStyle = `hsla(155, 100%, 65%, ${p.baseOpacity})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "hsla(155, 100%, 60%, 0.7)";
         ctx.fill();
+        ctx.shadowBlur = 0;
       }
 
       animRef.current = requestAnimationFrame(animate);
@@ -122,7 +125,7 @@ const ParticleBackground = () => {
       ref={canvasRef}
       aria-hidden="true"
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.55 }}
+      style={{ opacity: 0.95 }}
     />
   );
 };

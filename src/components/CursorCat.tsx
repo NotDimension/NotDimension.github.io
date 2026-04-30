@@ -210,7 +210,7 @@ const CursorCat = () => {
 
   if (mode === "off") return null;
   return (
-    <div ref={containerRef} className="cat-container" style={{ opacity: 0 }}>
+    <div ref={containerRef} className="cat-container">
       <canvas ref={canvasRef} className="cat-sprite" />
     </div>
   );

@@ -68,7 +68,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
             animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 10 }}
             transition={{ duration: 0.5, delay: 1 }}
           >
-            Initializing Environment...
+            Loading Portfolio...
           </motion.p>
         </motion.div>
       )}

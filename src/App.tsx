@@ -15,7 +15,6 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import CustomCursor from './components/CustomCursor';
-import CursorCat from './components/CursorCat';
 
 const queryClient = new QueryClient();
 

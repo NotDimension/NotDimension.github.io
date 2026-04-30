@@ -46,9 +46,6 @@ const App = () => {
           {/* Custom Inverting Cursor */}
           <CustomCursor />
 
-          {/* Pixel cat companion */}
-          <CursorCat />
-
           {/* Particle Layer */}
           <ParticleBackground />
           

@@ -74,15 +74,15 @@ const HeroSection = () => {
           </motion.div>
 
           {/* TEXT CONTENT */}
-          <div className="text-center md:text-left">
+          <div className="text-center md:text-left w-full min-w-0">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-              <span className="inline-block text-xs font-mono text-accent tracking-[0.4em] uppercase bg-accent/10 px-4 py-1.5 rounded-full border border-accent/20 mb-6">
+              <span className="inline-block text-[10px] sm:text-xs font-mono text-accent tracking-[0.3em] sm:tracking-[0.4em] uppercase bg-accent/10 px-3 sm:px-4 py-1.5 rounded-full border border-accent/20 mb-5 sm:mb-6">
                 Experienced Admin & Developer
               </span>
             </motion.div>
 
             {/* NAME WITH INDIVIDUAL LETTER HOVER */}
-            <h1 className="text-6xl md:text-8xl font-bold font-mono tracking-tighter mb-4 text-white flex justify-center md:justify-start">
+            <h1 className="text-[clamp(2.25rem,11vw,6rem)] md:text-8xl font-bold font-mono tracking-tighter mb-4 text-white flex justify-center md:justify-start flex-wrap">
               {name.split("").map((char, index) => (
                 <motion.span
                   key={index}
@@ -100,7 +100,7 @@ const HeroSection = () => {
             </h1>
 
             <motion.p 
-              className="text-muted-foreground text-lg md:text-xl max-w-md mb-8 leading-relaxed"
+              className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-md mx-auto md:mx-0 mb-8 leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
@@ -111,7 +111,7 @@ const HeroSection = () => {
 
             {/* BADGES */}
             <motion.div 
-              className="flex items-center gap-6 text-sm font-mono text-muted-foreground"
+              className="flex items-center justify-center md:justify-start gap-4 sm:gap-6 text-sm font-mono text-muted-foreground flex-wrap"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}

@@ -116,7 +116,7 @@
 }
 
 /* =========================================================
-   FIXED CAT SPRITE SYSTEM (48x48 Grid)
+   CAT COMPANION (canvas, frame-swapped in JS)
    ========================================================= */
 .cat-container {
   width: 64px;
@@ -133,33 +133,10 @@
 .cat-sprite {
   width: 100%;
   height: 100%;
-  background-repeat: no-repeat;
-  background-size: auto 100%;
+  image-rendering: pixelated;
   backface-visibility: hidden;
   transform: translateZ(0);
 }
-
-/* IDLE: 10 frames @ 64px */
-.state-idle .cat-sprite {
-  background-image: url('/sprites/IDLE.png');
-  animation: play-idle 1s steps(10, jump-none) infinite;
-}
-
-/* WALK: 15 frames @ 64px */
-.state-walk .cat-sprite {
-  background-image: url('/sprites/WALK.png');
-  animation: play-walk 0.9s steps(15, jump-none) infinite;
-}
-
-/* RUN: 10 frames @ 64px */
-.state-run .cat-sprite {
-  background-image: url('/sprites/RUN.png');
-  animation: play-run 0.55s steps(10, jump-none) infinite;
-}
-
-@keyframes play-idle { from { background-position: 0; }       to { background-position: -576px; } }
-@keyframes play-walk { from { background-position: 0; }       to { background-position: -896px; } }
-@keyframes play-run  { from { background-position: 0; }       to { background-position: -576px; } }
 
 /* =========================================================
    TEXT / GLOW UTILITIES

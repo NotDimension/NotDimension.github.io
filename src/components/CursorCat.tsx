@@ -3,24 +3,40 @@ import { useEffect, useRef, useState } from "react";
 type CatState = "idle" | "walk" | "run";
 
 const FRAME = 64;
-const TRAIL = 80;          // how far behind the cursor it sits when idle
-const MAX_SPEED = 6.5;     // px/frame cap during run
-const ACCEL = 0.35;        // how quickly it ramps up to target speed
-const FRICTION = 0.82;     // how quickly it slows when close
+const TRAIL = 80;
+const MAX_SPEED = 6.5;
+const ACCEL = 0.35;
+const FRICTION = 0.82;
 const WALK_THRESH = 0.4;
 const RUN_THRESH = 4.2;
 const FACING_DEADZONE = 1.2;
+const BASE_FACING = -1; // sprite faces left
 
-// Sprite cat faces LEFT by default
-const BASE_FACING = -1;
+const COUNTS: Record<CatState, number> = { idle: 10, walk: 15, run: 10 };
+const FPS: Record<CatState, number> = { idle: 10, walk: 16, run: 18 };
+
+const buildFrames = (state: CatState): HTMLImageElement[] => {
+  const arr: HTMLImageElement[] = [];
+  for (let i = 0; i < COUNTS[state]; i++) {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = `/sprites/${state}/${i}.png`;
+    arr.push(img);
+  }
+  return arr;
+};
 
 const CursorCat = () => {
-  const elRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const target = useRef({ x: -200, y: -200 });
   const pos = useRef({ x: -200, y: -200 });
   const vel = useRef({ x: 0, y: 0 });
   const facing = useRef<1 | -1>(1);
-  const [state, setState] = useState<CatState>("idle");
+  const stateRef = useRef<CatState>("idle");
+  const frameIdx = useRef(0);
+  const lastFrameTime = useRef(0);
+  const framesRef = useRef<Record<CatState, HTMLImageElement[]> | null>(null);
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
@@ -29,14 +45,23 @@ const CursorCat = () => {
     const small = window.innerWidth < 768;
     if (isTouch || reduced || small) return;
 
-    // Preload sprite sheets (lazy: only after we know we'll render)
-    ["/sprites/IDLE.png", "/sprites/WALK.png", "/sprites/RUN.png"].forEach((src) => {
-      const img = new Image();
-      img.decoding = "async";
-      img.src = src;
-    });
+    framesRef.current = {
+      idle: buildFrames("idle"),
+      walk: buildFrames("walk"),
+      run: buildFrames("run"),
+    };
 
     setEnabled(true);
+
+    const canvas = canvasRef.current!;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = FRAME * dpr;
+    canvas.height = FRAME * dpr;
+    canvas.style.width = `${FRAME}px`;
+    canvas.style.height = `${FRAME}px`;
+    const ctx = canvas.getContext("2d")!;
+    ctx.imageSmoothingEnabled = false;
+    ctx.scale(dpr, dpr);
 
     const onMove = (e: MouseEvent) => {
       target.current.x = e.clientX;
@@ -45,9 +70,17 @@ const CursorCat = () => {
     window.addEventListener("mousemove", onMove, { passive: true });
 
     let raf = 0;
-    let lastState: CatState = "idle";
-    const tick = () => {
-      // Aim point is the cursor offset back along the approach vector by TRAIL.
+    const draw = () => {
+      const frames = framesRef.current![stateRef.current];
+      const img = frames[frameIdx.current % frames.length];
+      ctx.clearRect(0, 0, FRAME, FRAME);
+      if (img && img.complete && img.naturalWidth > 0) {
+        ctx.drawImage(img, 0, 0, FRAME, FRAME);
+      }
+    };
+
+    const tick = (now: number) => {
+      // physics
       const dxRaw = target.current.x - pos.current.x;
       const dyRaw = target.current.y - pos.current.y;
       const distRaw = Math.hypot(dxRaw, dyRaw);
@@ -65,11 +98,9 @@ const CursorCat = () => {
       const dist = Math.hypot(dx, dy);
 
       if (dist < 0.5) {
-        // settle
         vel.current.x *= FRICTION;
         vel.current.y *= FRICTION;
       } else {
-        // accelerate toward goal, capped
         const desiredSpeed = Math.min(MAX_SPEED, dist * 0.18);
         const tx = (dx / dist) * desiredSpeed;
         const ty = (dy / dist) * desiredSpeed;
@@ -81,27 +112,35 @@ const CursorCat = () => {
       pos.current.y += vel.current.y;
 
       const speed = Math.hypot(vel.current.x, vel.current.y);
-
-      // Facing only updates when there's meaningful horizontal motion
       if (Math.abs(vel.current.x) > FACING_DEADZONE) {
         facing.current = vel.current.x > 0 ? 1 : -1;
       }
 
       const next: CatState =
         speed < WALK_THRESH ? "idle" : speed > RUN_THRESH ? "run" : "walk";
-      if (next !== lastState) {
-        lastState = next;
-        setState(next);
+      if (next !== stateRef.current) {
+        stateRef.current = next;
+        frameIdx.current = 0;
+        lastFrameTime.current = now;
       }
 
-      const el = elRef.current;
+      // advance frame on its own clock (independent of rAF rate)
+      const interval = 1000 / FPS[stateRef.current];
+      if (now - lastFrameTime.current >= interval) {
+        frameIdx.current++;
+        lastFrameTime.current = now;
+        draw();
+      }
+
+      const el = containerRef.current;
       if (el) {
-        const flip = facing.current * BASE_FACING; // sprite faces left → invert
+        const flip = facing.current * BASE_FACING;
         el.style.transform = `translate3d(${pos.current.x - FRAME / 2}px, ${pos.current.y - FRAME / 2}px, 0) scaleX(${flip})`;
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
+    draw();
 
     return () => {
       window.removeEventListener("mousemove", onMove);
@@ -111,8 +150,8 @@ const CursorCat = () => {
 
   if (!enabled) return null;
   return (
-    <div ref={elRef} className={`cat-container state-${state}`}>
-      <div className="cat-sprite" />
+    <div ref={containerRef} className="cat-container">
+      <canvas ref={canvasRef} className="cat-sprite" />
     </div>
   );
 };

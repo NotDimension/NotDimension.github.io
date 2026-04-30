@@ -140,13 +140,11 @@ const CursorCat = () => {
       const dt = Math.min(now - lastTickTime, 50);
       lastTickTime = now;
 
-      // Cursor-to-cat distance for activation radius
+      // Cursor-to-cat vector
       const cursorDx = target.current.x - pos.current.x;
       const cursorDy = target.current.y - pos.current.y;
       const cursorDist = Math.hypot(cursorDx, cursorDy);
-      const wantVisible = cursorDist < ACTIVATION_RADIUS;
-      const fadeStep = dt / FADE_MS;
-      opacity.current = Math.max(0, Math.min(1, opacity.current + (wantVisible ? fadeStep : -fadeStep)));
+      void dt;
 
       // Trail-behind goal
       let goalX = target.current.x;
@@ -161,7 +159,7 @@ const CursorCat = () => {
       const dy = goalY - pos.current.y;
       const dist = Math.hypot(dx, dy);
 
-      if (dist < 0.5 || !wantVisible) {
+      if (dist < 0.5) {
         vel.current.x *= FRICTION;
         vel.current.y *= FRICTION;
       } else {
@@ -197,7 +195,6 @@ const CursorCat = () => {
       }
 
       const flip = facing.current * BASE_FACING;
-      container.style.opacity = String(opacity.current);
       container.style.transform = `translate3d(${pos.current.x - FRAME / 2}px, ${pos.current.y - FRAME / 2}px, 0) scaleX(${flip})`;
 
       raf = requestAnimationFrame(tick);

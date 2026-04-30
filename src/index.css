@@ -43,7 +43,7 @@
   html { scroll-behavior: smooth; }
   body {
     background-color: hsl(var(--background));
-    @apply text-foreground font-sans antialiased min-h-screen;
+    @apply text-foreground font-sans antialiased min-h-screen overflow-x-hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -140,26 +140,26 @@
 }
 
 /* IDLE: 10 frames @ 64px */
-.state-idle {
+.state-idle .cat-sprite {
   background-image: url('/sprites/IDLE.png');
-  animation: play-idle 1s steps(10) infinite;
+  animation: play-idle 1s steps(10, jump-none) infinite;
 }
 
 /* WALK: 15 frames @ 64px */
-.state-walk {
+.state-walk .cat-sprite {
   background-image: url('/sprites/WALK.png');
-  animation: play-walk 0.9s steps(15) infinite;
+  animation: play-walk 0.9s steps(15, jump-none) infinite;
 }
 
 /* RUN: 10 frames @ 64px */
-.state-run {
+.state-run .cat-sprite {
   background-image: url('/sprites/RUN.png');
-  animation: play-run 0.55s steps(10) infinite;
+  animation: play-run 0.55s steps(10, jump-none) infinite;
 }
 
-@keyframes play-idle { from { background-position: 0; }       to { background-position: -640px; } }
-@keyframes play-walk { from { background-position: 0; }       to { background-position: -960px; } }
-@keyframes play-run  { from { background-position: 0; }       to { background-position: -640px; } }
+@keyframes play-idle { from { background-position: 0; }       to { background-position: -576px; } }
+@keyframes play-walk { from { background-position: 0; }       to { background-position: -896px; } }
+@keyframes play-run  { from { background-position: 0; }       to { background-position: -576px; } }
 
 /* =========================================================
    TEXT / GLOW UTILITIES

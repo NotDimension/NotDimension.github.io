@@ -8,7 +8,7 @@ const HeroSection = () => {
   const backgroundPath = "/bg-landscape.jpg";
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#030d08]">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#030d08] px-4 sm:px-6">
       {/* 1. HIDDEN LOADER: Triggers the fade-in once the image is in browser cache */}
       <img
         src={backgroundPath}
@@ -37,9 +37,9 @@ const HeroSection = () => {
       {/* Soft accent halo overlays */}
       <div className="absolute inset-0 pointer-events-none z-[1] bg-radial-gradient from-accent/5 to-transparent" />
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
-          
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-2 sm:px-6">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-24">
+
           {/* PROFILE IMAGE */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -56,7 +56,7 @@ const HeroSection = () => {
 
             {/* Image container */}
             <div
-              className="relative w-56 h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-2 border-accent/30 shadow-[0_0_40px_rgba(16,185,129,0.18)] transition-[border-color,box-shadow] duration-500 group-hover:border-accent/70 group-hover:shadow-[0_0_60px_rgba(16,185,129,0.35)]"
+              className="relative w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-2 border-accent/30 shadow-[0_0_40px_rgba(16,185,129,0.18)] transition-[border-color,box-shadow] duration-500 group-hover:border-accent/70 group-hover:shadow-[0_0_60px_rgba(16,185,129,0.35)]"
               style={{ transform: "translateZ(0)" }}
             >
               <img
@@ -74,15 +74,15 @@ const HeroSection = () => {
           </motion.div>
 
           {/* TEXT CONTENT */}
-          <div className="text-center md:text-left">
+          <div className="text-center md:text-left w-full min-w-0">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-              <span className="inline-block text-xs font-mono text-accent tracking-[0.4em] uppercase bg-accent/10 px-4 py-1.5 rounded-full border border-accent/20 mb-6">
+              <span className="inline-block text-[10px] sm:text-xs font-mono text-accent tracking-[0.3em] sm:tracking-[0.4em] uppercase bg-accent/10 px-3 sm:px-4 py-1.5 rounded-full border border-accent/20 mb-5 sm:mb-6">
                 Experienced Admin & Developer
               </span>
             </motion.div>
 
             {/* NAME WITH INDIVIDUAL LETTER HOVER */}
-            <h1 className="text-6xl md:text-8xl font-bold font-mono tracking-tighter mb-4 text-white flex justify-center md:justify-start">
+            <h1 className="text-[clamp(2.25rem,11vw,6rem)] md:text-8xl font-bold font-mono tracking-tighter mb-4 text-white flex justify-center md:justify-start flex-wrap">
               {name.split("").map((char, index) => (
                 <motion.span
                   key={index}
@@ -100,7 +100,7 @@ const HeroSection = () => {
             </h1>
 
             <motion.p 
-              className="text-muted-foreground text-lg md:text-xl max-w-md mb-8 leading-relaxed"
+              className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-md mx-auto md:mx-0 mb-8 leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
@@ -111,7 +111,7 @@ const HeroSection = () => {
 
             {/* BADGES */}
             <motion.div 
-              className="flex items-center gap-6 text-sm font-mono text-muted-foreground"
+              className="flex items-center justify-center md:justify-start gap-4 sm:gap-6 text-sm font-mono text-muted-foreground flex-wrap"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}

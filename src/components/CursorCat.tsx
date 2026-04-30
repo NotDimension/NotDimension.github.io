@@ -11,66 +11,97 @@ const WALK_THRESH = 0.4;
 const RUN_THRESH = 4.2;
 const FACING_DEADZONE = 1.2;
 const BASE_FACING = -1; // sprite faces left
+const ACTIVATION_RADIUS = 360; // px from cat to cursor before it wakes
+const FADE_MS = 350;
 
 const COUNTS: Record<CatState, number> = { idle: 10, walk: 15, run: 10 };
 const FPS: Record<CatState, number> = { idle: 10, walk: 16, run: 18 };
 
-const buildFrames = (state: CatState): HTMLImageElement[] => {
-  const arr: HTMLImageElement[] = [];
+const loadFrames = (state: CatState): Promise<HTMLImageElement[]> => {
+  const promises: Promise<HTMLImageElement>[] = [];
   for (let i = 0; i < COUNTS[state]; i++) {
-    const img = new Image();
-    img.decoding = "async";
-    img.src = `/sprites/${state}/${i}.png`;
-    arr.push(img);
+    promises.push(
+      new Promise((resolve, reject) => {
+        const img = new Image();
+        img.decoding = "async";
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(`failed ${state}/${i}`));
+        img.src = `/sprites/${state}/${i}.png`;
+      })
+    );
   }
-  return arr;
+  return Promise.all(promises);
 };
 
 const CursorCat = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const target = useRef({ x: -200, y: -200 });
-  const pos = useRef({ x: -200, y: -200 });
+  const target = useRef({ x: -9999, y: -9999 });
+  const pos = useRef({ x: -9999, y: -9999 });
   const vel = useRef({ x: 0, y: 0 });
   const facing = useRef<1 | -1>(1);
   const stateRef = useRef<CatState>("idle");
   const frameIdx = useRef(0);
   const lastFrameTime = useRef(0);
+  const opacity = useRef(0);
   const framesRef = useRef<Record<CatState, HTMLImageElement[]> | null>(null);
-  const [enabled, setEnabled] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [mode, setMode] = useState<"off" | "static" | "animated">("off");
 
+  // Decide what mode we're in (runs once)
   useEffect(() => {
     const isTouch = window.matchMedia("(hover: none)").matches;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const small = window.innerWidth < 768;
-    if (isTouch || reduced || small) return;
+    if (isTouch || small) {
+      setMode("off");
+      return;
+    }
+    setMode(reduced ? "static" : "animated");
+  }, []);
 
-    framesRef.current = {
-      idle: buildFrames("idle"),
-      walk: buildFrames("walk"),
-      run: buildFrames("run"),
+  // Preload frames once mode is decided
+  useEffect(() => {
+    if (mode === "off") return;
+    let cancelled = false;
+    const states: CatState[] = mode === "static" ? ["idle"] : ["idle", "walk", "run"];
+    Promise.all(states.map((s) => loadFrames(s).then((f) => [s, f] as const)))
+      .then((entries) => {
+        if (cancelled) return;
+        const map = { idle: [], walk: [], run: [] } as Record<CatState, HTMLImageElement[]>;
+        entries.forEach(([s, f]) => (map[s] = f));
+        // Fill missing sets with idle to avoid undefined access
+        if (map.walk.length === 0) map.walk = map.idle;
+        if (map.run.length === 0) map.run = map.idle;
+        framesRef.current = map;
+        setReady(true);
+      })
+      .catch(() => {
+        // swallow — if sprites fail, just don't show the cat
+      });
+    return () => {
+      cancelled = true;
     };
+  }, [mode]);
 
-    setEnabled(true);
+  // Main loop — only after canvas is mounted AND frames are ready
+  useEffect(() => {
+    if (!ready || mode === "off") return;
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-    const canvas = canvasRef.current!;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = FRAME * dpr;
     canvas.height = FRAME * dpr;
     canvas.style.width = `${FRAME}px`;
     canvas.style.height = `${FRAME}px`;
-    const ctx = canvas.getContext("2d")!;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
     ctx.imageSmoothingEnabled = false;
     ctx.scale(dpr, dpr);
 
-    const onMove = (e: MouseEvent) => {
-      target.current.x = e.clientX;
-      target.current.y = e.clientY;
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-
-    let raf = 0;
-    const draw = () => {
+    const drawFrame = () => {
       const frames = framesRef.current![stateRef.current];
       const img = frames[frameIdx.current % frames.length];
       ctx.clearRect(0, 0, FRAME, FRAME);
@@ -79,25 +110,52 @@ const CursorCat = () => {
       }
     };
 
-    const tick = (now: number) => {
-      // physics
-      const dxRaw = target.current.x - pos.current.x;
-      const dyRaw = target.current.y - pos.current.y;
-      const distRaw = Math.hypot(dxRaw, dyRaw);
+    // STATIC MODE — draw idle frame 0 once, position at bottom-right corner
+    if (mode === "static") {
+      drawFrame();
+      container.style.opacity = "1";
+      container.style.transform = `translate3d(${window.innerWidth - 96}px, ${window.innerHeight - 96}px, 0) scaleX(${BASE_FACING})`;
+      return;
+    }
 
+    // ANIMATED MODE
+    const onMove = (e: MouseEvent) => {
+      target.current.x = e.clientX;
+      target.current.y = e.clientY;
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+
+    // Adaptive frame cadence — slightly slower redraw on small screens to save battery
+    const cadenceScale = window.innerWidth < 1024 ? 0.85 : 1;
+
+    let raf = 0;
+    let lastTickTime = performance.now();
+    const tick = (now: number) => {
+      const dt = Math.min(now - lastTickTime, 50);
+      lastTickTime = now;
+
+      // Cursor-to-cat distance for activation radius
+      const cursorDx = target.current.x - pos.current.x;
+      const cursorDy = target.current.y - pos.current.y;
+      const cursorDist = Math.hypot(cursorDx, cursorDy);
+      const wantVisible = cursorDist < ACTIVATION_RADIUS;
+      const fadeStep = dt / FADE_MS;
+      opacity.current = Math.max(0, Math.min(1, opacity.current + (wantVisible ? fadeStep : -fadeStep)));
+
+      // Trail-behind goal
       let goalX = target.current.x;
       let goalY = target.current.y;
-      if (distRaw > 0.001) {
-        const trail = Math.min(TRAIL, distRaw);
-        goalX = target.current.x - (dxRaw / distRaw) * trail;
-        goalY = target.current.y - (dyRaw / distRaw) * trail;
+      if (cursorDist > 0.001) {
+        const trail = Math.min(TRAIL, cursorDist);
+        goalX = target.current.x - (cursorDx / cursorDist) * trail;
+        goalY = target.current.y - (cursorDy / cursorDist) * trail;
       }
 
       const dx = goalX - pos.current.x;
       const dy = goalY - pos.current.y;
       const dist = Math.hypot(dx, dy);
 
-      if (dist < 0.5) {
+      if (dist < 0.5 || !wantVisible) {
         vel.current.x *= FRICTION;
         vel.current.y *= FRICTION;
       } else {
@@ -122,35 +180,34 @@ const CursorCat = () => {
         stateRef.current = next;
         frameIdx.current = 0;
         lastFrameTime.current = now;
+        drawFrame();
       }
 
-      // advance frame on its own clock (independent of rAF rate)
-      const interval = 1000 / FPS[stateRef.current];
+      const interval = (1000 / FPS[stateRef.current]) / cadenceScale;
       if (now - lastFrameTime.current >= interval) {
         frameIdx.current++;
         lastFrameTime.current = now;
-        draw();
+        drawFrame();
       }
 
-      const el = containerRef.current;
-      if (el) {
-        const flip = facing.current * BASE_FACING;
-        el.style.transform = `translate3d(${pos.current.x - FRAME / 2}px, ${pos.current.y - FRAME / 2}px, 0) scaleX(${flip})`;
-      }
+      const flip = facing.current * BASE_FACING;
+      container.style.opacity = String(opacity.current);
+      container.style.transform = `translate3d(${pos.current.x - FRAME / 2}px, ${pos.current.y - FRAME / 2}px, 0) scaleX(${flip})`;
+
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    draw();
+    drawFrame();
 
     return () => {
       window.removeEventListener("mousemove", onMove);
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [ready, mode]);
 
-  if (!enabled) return null;
+  if (mode === "off") return null;
   return (
-    <div ref={containerRef} className="cat-container">
+    <div ref={containerRef} className="cat-container" style={{ opacity: 0 }}>
       <canvas ref={canvasRef} className="cat-sprite" />
     </div>
   );

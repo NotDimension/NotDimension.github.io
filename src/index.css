@@ -119,13 +119,15 @@
    FIXED CAT SPRITE SYSTEM (48x48 Grid)
    ========================================================= */
 .cat-container {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   position: fixed;
+  top: 0;
+  left: 0;
   pointer-events: none;
-  image-rendering: pixelated; 
+  image-rendering: pixelated;
   z-index: 9999;
-  will-change: left, top, transform;
+  will-change: transform;
 }
 
 .cat-sprite {
@@ -133,35 +135,31 @@
   height: 100%;
   background-repeat: no-repeat;
   background-size: auto 100%;
-  /* Fixes visual artifacts during flip */
   backface-visibility: hidden;
   transform: translateZ(0);
 }
 
-/* IDLE: 10 frames */
+/* IDLE: 10 frames @ 64px */
 .state-idle {
   background-image: url('/sprites/IDLE.png');
-  animation: play-idle 1.0s steps(10) infinite;
+  animation: play-idle 1s steps(10) infinite;
 }
 
-/* WALK: 14 frames */
+/* WALK: 15 frames @ 64px */
 .state-walk {
   background-image: url('/sprites/WALK.png');
-  animation: play-walk 0.8s steps(14) infinite;
+  animation: play-walk 0.9s steps(15) infinite;
 }
 
-/* RUN: 8 frames */
+/* RUN: 10 frames @ 64px */
 .state-run {
   background-image: url('/sprites/RUN.png');
-  animation: play-run 0.5s steps(8) infinite;
+  animation: play-run 0.55s steps(10) infinite;
 }
 
-/* The 'to' value must be -(FrameCount * FrameWidth) 
-   to jump through the sheet correctly.
-*/
-@keyframes play-idle { from { background-position: 0px; } to { background-position: -480px; } }
-@keyframes play-walk { from { background-position: 0px; } to { background-position: -672px; } }
-@keyframes play-run  { from { background-position: 0px; } to { background-position: -384px; } }
+@keyframes play-idle { from { background-position: 0; }       to { background-position: -640px; } }
+@keyframes play-walk { from { background-position: 0; }       to { background-position: -960px; } }
+@keyframes play-run  { from { background-position: 0; }       to { background-position: -640px; } }
 
 /* =========================================================
    TEXT / GLOW UTILITIES

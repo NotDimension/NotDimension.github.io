@@ -118,7 +118,13 @@ const CursorCat = () => {
       return;
     }
 
-    // ANIMATED MODE
+    // ANIMATED MODE — start near center so it's visible before first mousemove
+    pos.current.x = window.innerWidth / 2;
+    pos.current.y = window.innerHeight / 2 + 120;
+    target.current.x = window.innerWidth / 2;
+    target.current.y = window.innerHeight / 2;
+    container.style.opacity = "1";
+
     const onMove = (e: MouseEvent) => {
       target.current.x = e.clientX;
       target.current.y = e.clientY;

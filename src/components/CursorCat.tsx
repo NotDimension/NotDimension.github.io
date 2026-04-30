@@ -36,14 +36,14 @@ const loadFrames = (state: CatState): Promise<HTMLImageElement[]> => {
 const CursorCat = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const target = useRef({ x: -9999, y: -9999 });
-  const pos = useRef({ x: -9999, y: -9999 });
+  const target = useRef({ x: 0, y: 0 });
+  const pos = useRef({ x: 0, y: 0 });
   const vel = useRef({ x: 0, y: 0 });
   const facing = useRef<1 | -1>(1);
   const stateRef = useRef<CatState>("idle");
   const frameIdx = useRef(0);
   const lastFrameTime = useRef(0);
-  const opacity = useRef(0);
+  const opacity = useRef(1);
   const framesRef = useRef<Record<CatState, HTMLImageElement[]> | null>(null);
   const [ready, setReady] = useState(false);
   const [mode, setMode] = useState<"off" | "static" | "animated">("off");
@@ -118,7 +118,13 @@ const CursorCat = () => {
       return;
     }
 
-    // ANIMATED MODE
+    // ANIMATED MODE — start near center so it's visible before first mousemove
+    pos.current.x = window.innerWidth / 2;
+    pos.current.y = window.innerHeight / 2 + 120;
+    target.current.x = window.innerWidth / 2;
+    target.current.y = window.innerHeight / 2;
+    container.style.opacity = "1";
+
     const onMove = (e: MouseEvent) => {
       target.current.x = e.clientX;
       target.current.y = e.clientY;
@@ -134,13 +140,11 @@ const CursorCat = () => {
       const dt = Math.min(now - lastTickTime, 50);
       lastTickTime = now;
 
-      // Cursor-to-cat distance for activation radius
+      // Cursor-to-cat vector
       const cursorDx = target.current.x - pos.current.x;
       const cursorDy = target.current.y - pos.current.y;
       const cursorDist = Math.hypot(cursorDx, cursorDy);
-      const wantVisible = cursorDist < ACTIVATION_RADIUS;
-      const fadeStep = dt / FADE_MS;
-      opacity.current = Math.max(0, Math.min(1, opacity.current + (wantVisible ? fadeStep : -fadeStep)));
+      void dt;
 
       // Trail-behind goal
       let goalX = target.current.x;
@@ -155,7 +159,7 @@ const CursorCat = () => {
       const dy = goalY - pos.current.y;
       const dist = Math.hypot(dx, dy);
 
-      if (dist < 0.5 || !wantVisible) {
+      if (dist < 0.5) {
         vel.current.x *= FRICTION;
         vel.current.y *= FRICTION;
       } else {
@@ -191,7 +195,6 @@ const CursorCat = () => {
       }
 
       const flip = facing.current * BASE_FACING;
-      container.style.opacity = String(opacity.current);
       container.style.transform = `translate3d(${pos.current.x - FRAME / 2}px, ${pos.current.y - FRAME / 2}px, 0) scaleX(${flip})`;
 
       raf = requestAnimationFrame(tick);
@@ -207,7 +210,7 @@ const CursorCat = () => {
 
   if (mode === "off") return null;
   return (
-    <div ref={containerRef} className="cat-container" style={{ opacity: 0 }}>
+    <div ref={containerRef} className="cat-container">
       <canvas ref={canvasRef} className="cat-sprite" />
     </div>
   );

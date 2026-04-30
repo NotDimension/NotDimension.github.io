@@ -36,14 +36,14 @@ const loadFrames = (state: CatState): Promise<HTMLImageElement[]> => {
 const CursorCat = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const target = useRef({ x: -9999, y: -9999 });
-  const pos = useRef({ x: -9999, y: -9999 });
+  const target = useRef({ x: 0, y: 0 });
+  const pos = useRef({ x: 0, y: 0 });
   const vel = useRef({ x: 0, y: 0 });
   const facing = useRef<1 | -1>(1);
   const stateRef = useRef<CatState>("idle");
   const frameIdx = useRef(0);
   const lastFrameTime = useRef(0);
-  const opacity = useRef(0);
+  const opacity = useRef(1);
   const framesRef = useRef<Record<CatState, HTMLImageElement[]> | null>(null);
   const [ready, setReady] = useState(false);
   const [mode, setMode] = useState<"off" | "static" | "animated">("off");

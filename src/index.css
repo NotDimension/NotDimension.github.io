@@ -43,9 +43,10 @@
   html { scroll-behavior: smooth; }
   body {
     background-color: hsl(var(--background));
-    @apply text-foreground font-sans antialiased min-h-screen;
+    @apply text-foreground font-sans antialiased min-h-screen overflow-x-hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
   }
 }
 

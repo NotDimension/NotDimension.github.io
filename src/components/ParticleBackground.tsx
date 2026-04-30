@@ -91,6 +91,14 @@ const ParticleBackground = () => {
       ctx.clearRect(0, 0, w, h);
 
       const particles = particlesRef.current;
+      // Set glow once outside the loop (huge perf win vs per-particle shadowBlur toggling)
+      if (!lowEnd) {
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "hsla(155, 100%, 60%, 0.7)";
+      } else {
+        ctx.shadowBlur = 0;
+      }
+      ctx.fillStyle = `hsla(155, 100%, 65%, 1)`;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         p.x += p.vx * dt;
@@ -100,14 +108,13 @@ const ParticleBackground = () => {
         if (p.y < -10) p.y = h + 10;
         else if (p.y > h + 10) p.y = -10;
 
+        ctx.globalAlpha = p.baseOpacity;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(155, 100%, 65%, ${p.baseOpacity})`;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = "hsla(155, 100%, 60%, 0.7)";
         ctx.fill();
-        ctx.shadowBlur = 0;
       }
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
 
       animRef.current = requestAnimationFrame(animate);
     };

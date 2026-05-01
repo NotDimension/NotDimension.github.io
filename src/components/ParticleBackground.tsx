@@ -1,15 +1,10 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Realistic lava-lamp background.
- *
- * - Solid, soft, gooey blobs (filled — no rings) that slowly rise/sink
- *   like wax in a lava lamp, with buoyancy + thermal cycling.
- * - Big blobs occasionally "shed" a smaller droplet that rises away.
- * - Random subtle pulses make some blobs swell briefly.
- * - Cursor does NOT push blobs — instead, hovering near a blob shifts its
- *   hue toward a brighter green for a soft glow response.
- * - Perf: low-res offscreen canvas + heavy blur for cheap metaballs.
+ * Optimized Sharp Lava Lamp Background
+ * - Procedurally generated physics (unique per visitor)
+ * - Solid blobs (no blur filter) using gradient stops
+ * - Performance optimized: no heavy CSS filters
  */
 
 interface Blob {
@@ -17,22 +12,23 @@ interface Blob {
   y: number;
   vx: number;
   vy: number;
-  r: number;          // current radius
-  baseR: number;      // resting radius
-  pulse: number;      // transient swell (0..1)
-  pulseTimer: number; // seconds until next random pulse
-  hue: number;        // current hue (animates toward target)
+  r: number;
+  baseR: number;
+  pulse: number;
+  pulseTimer: number;
+  hue: number;
   targetHue: number;
-  temp: number;       // thermal cycle 0..1 (drives rise/sink)
+  temp: number;
   tempDir: 1 | -1;
   phase: number;
-  shedTimer: number;  // seconds until next droplet shed (large blobs only)
+  shedTimer: number;
   alive: boolean;
+  viscosity: number; // Unique per-blob movement factor
 }
 
-const BASE_HUE = 152;     // site green
-const HOT_HUE = 162;      // brighter, more lime — "hot"
-const HOVER_HUE = 168;    // hover response
+const BASE_HUE = 152;
+const HOT_HUE = 162;
+const HOVER_HUE = 168;
 
 const ParticleBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,170 +36,140 @@ const ParticleBackground = () => {
   const animRef = useRef<number>(0);
   const visibleRef = useRef(true);
   const mouseRef = useRef({ x: -9999, y: -9999, active: false });
+  
+  // Procedural world constants (unique per session)
+  const worldRef = useRef({
+    gravity: 0.04 + Math.random() * 0.04,
+    wobbleSpeed: 0.3 + Math.random() * 0.4,
+    viscosity: 0.92 + Math.random() * 0.05
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     const nav = navigator as Navigator & { deviceMemory?: number };
-    const isCoarse = window.matchMedia("(pointer: coarse)").matches;
-    const lowEnd =
-      isCoarse ||
-      (nav.hardwareConcurrency && nav.hardwareConcurrency <= 4) ||
-      (nav.deviceMemory && nav.deviceMemory <= 4);
+    const lowEnd = (nav.hardwareConcurrency && nav.hardwareConcurrency <= 4) || (nav.deviceMemory && nav.deviceMemory <= 4);
 
-    // Low internal res + blur = cheap metaballs
-    const SCALE = lowEnd ? 0.3 : 0.42;
+    // Using higher resolution since we removed the expensive blur filter
+    const SCALE = window.devicePixelRatio || 1;
 
     let w = 0;
     let h = 0;
 
     const makeBlob = (opts?: Partial<Blob>): Blob => {
-      const baseR =
-        opts?.baseR ?? (Math.random() * 0.07 + 0.08) * Math.min(w, h);
+      const baseR = opts?.baseR ?? (Math.random() * 0.06 + 0.07) * Math.min(window.innerWidth, window.innerHeight);
       return {
         x: opts?.x ?? Math.random() * w,
         y: opts?.y ?? Math.random() * h,
-        vx: opts?.vx ?? (Math.random() - 0.5) * 0.05,
-        vy: opts?.vy ?? (Math.random() - 0.5) * 0.05,
+        vx: opts?.vx ?? (Math.random() - 0.5) * 0.5,
+        vy: opts?.vy ?? (Math.random() - 0.5) * 0.5,
         r: baseR,
         baseR,
         pulse: 0,
         pulseTimer: 2 + Math.random() * 6,
-        hue: BASE_HUE + Math.random() * 6,
-        targetHue: BASE_HUE + Math.random() * 6,
+        hue: BASE_HUE + Math.random() * 4,
+        targetHue: BASE_HUE,
         temp: Math.random(),
         tempDir: Math.random() < 0.5 ? 1 : -1,
         phase: Math.random() * Math.PI * 2,
-        shedTimer: 6 + Math.random() * 10,
+        shedTimer: 10 + Math.random() * 15,
         alive: true,
+        viscosity: 0.94 + Math.random() * 0.04, // Procedural drag
       };
     };
 
     const resize = () => {
       const cssW = window.innerWidth;
       const cssH = window.innerHeight;
-      w = Math.max(1, Math.floor(cssW * SCALE));
-      h = Math.max(1, Math.floor(cssH * SCALE));
+      w = cssW * SCALE;
+      h = cssH * SCALE;
       canvas.width = w;
       canvas.height = h;
       canvas.style.width = `${cssW}px`;
       canvas.style.height = `${cssH}px`;
 
-      const count = lowEnd ? 6 : cssW < 768 ? 7 : 11;
+      const count = lowEnd ? 5 : cssW < 768 ? 6 : 9;
       blobsRef.current = Array.from({ length: count }, () => makeBlob());
     };
+    
     resize();
     window.addEventListener("resize", resize, { passive: true });
-
-    const onVisibility = () => {
-      visibleRef.current = !document.hidden;
-    };
-    document.addEventListener("visibilitychange", onVisibility);
 
     const onPointer = (e: PointerEvent) => {
       mouseRef.current.x = e.clientX * SCALE;
       mouseRef.current.y = e.clientY * SCALE;
       mouseRef.current.active = true;
     };
-    const onLeave = () => {
-      mouseRef.current.active = false;
-    };
-    if (!isCoarse) {
-      window.addEventListener("pointermove", onPointer, { passive: true });
-      window.addEventListener("pointerleave", onLeave, { passive: true });
-    }
-
-    const blurPx = lowEnd ? 16 : 22;
+    
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    window.addEventListener("pointerleave", () => { mouseRef.current.active = false; });
 
     const drawBlob = (b: Blob) => {
+      // Instead of Global Blur, we use a sharp-step radial gradient for solid look
       const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-      grad.addColorStop(0, `hsla(${b.hue}, 100%, 60%, 0.85)`);
-      grad.addColorStop(0.55, `hsla(${b.hue}, 100%, 50%, 0.5)`);
-      grad.addColorStop(1, `hsla(${b.hue}, 100%, 45%, 0)`);
+      grad.addColorStop(0, `hsla(${b.hue}, 100%, 60%, 0.8)`);
+      grad.addColorStop(0.85, `hsla(${b.hue}, 100%, 45%, 0.6)`);
+      grad.addColorStop(0.98, `hsla(${b.hue}, 100%, 40%, 0.1)`);
+      grad.addColorStop(1, `hsla(${b.hue}, 100%, 40%, 0)`);
+      
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      // Use a slightly oval shape based on velocity for "gooey" stretching
+      const stretch = Math.min(Math.abs(b.vy) * 0.1, 0.2);
+      ctx.ellipse(b.x, b.y, b.r * (1 - stretch), b.r * (1 + stretch), 0, 0, Math.PI * 2);
       ctx.fill();
     };
 
-    const drawFrame = (timeSec: number, dt: number, dtSec: number) => {
+    const drawFrame = (timeSec: number, dtSec: number) => {
       ctx.clearRect(0, 0, w, h);
-      ctx.filter = `blur(${blurPx}px)`;
-      ctx.globalCompositeOperation = "lighter";
-
+      
       const blobs = blobsRef.current;
       const m = mouseRef.current;
-      const mouseInfluence = 180 * SCALE * 1.6;
+      const world = worldRef.current;
+      const mouseInfluence = 200 * SCALE;
 
       for (let i = blobs.length - 1; i >= 0; i--) {
         const b = blobs[i];
-        if (!b.alive) {
-          blobs.splice(i, 1);
-          continue;
-        }
-
-        // ----- Thermal buoyancy: blobs cycle hot↔cool, driving rise/sink -----
-        b.temp += b.tempDir * 0.04 * dtSec;
+        
+        // Buoyancy Logic
+        b.temp += b.tempDir * 0.05 * dtSec;
         if (b.temp > 1) { b.temp = 1; b.tempDir = -1; }
         else if (b.temp < 0) { b.temp = 0; b.tempDir = 1; }
 
-        // Hot blobs rise (negative y), cool blobs sink. Very gentle.
-        const buoyancy = (b.temp - 0.5) * -0.06; // px/frame
-        b.vy += buoyancy * dt;
+        const buoyancy = (b.temp - 0.5) * -world.gravity;
+        b.vy += buoyancy;
 
-        // Tiny lateral wobble — convection currents
-        b.vx += Math.sin(timeSec * 0.4 + b.phase) * 0.0025 * dt;
+        // Convection Wobble
+        b.vx += Math.sin(timeSec * world.wobbleSpeed + b.phase) * 0.01;
 
-        // Heavy damping = slow, viscous wax motion
-        b.vx *= 0.94;
-        b.vy *= 0.96;
+        // Friction / Viscosity
+        b.vx *= b.viscosity;
+        b.vy *= b.viscosity;
 
-        // Cap speed
-        const sp = Math.hypot(b.vx, b.vy);
-        const maxSp = 0.55;
-        if (sp > maxSp) {
-          b.vx = (b.vx / sp) * maxSp;
-          b.vy = (b.vy / sp) * maxSp;
+        b.x += b.vx * (dtSec * 60);
+        b.y += b.vy * (dtSec * 60);
+
+        // Soft Wall Bounce
+        if (b.y < b.r) {
+          b.vy += 0.05;
+          b.tempDir = -1;
+        } else if (b.y > h - b.r) {
+          b.vy -= 0.05;
+          b.tempDir = 1;
         }
 
-        b.x += b.vx * dt;
-        b.y += b.vy * dt;
+        // Horizontal Wrap
+        const wrapPad = b.r * 2;
+        if (b.x < -wrapPad) b.x = w + wrapPad;
+        else if (b.x > w + wrapPad) b.x = -wrapPad;
 
-        // Bounce softly off top/bottom (the "lamp" walls), wrap horizontally
-        if (b.y < b.r * 0.3) {
-          b.y = b.r * 0.3;
-          b.vy = Math.abs(b.vy) * 0.5;
-          b.tempDir = -1; // cools at top
-        } else if (b.y > h - b.r * 0.3) {
-          b.y = h - b.r * 0.3;
-          b.vy = -Math.abs(b.vy) * 0.5;
-          b.tempDir = 1; // heats at bottom
-        }
-        const padX = b.r * 1.5;
-        if (b.x < -padX) b.x = w + padX;
-        else if (b.x > w + padX) b.x = -padX;
-
-        // ----- Random pulse: occasional swell -----
-        b.pulseTimer -= dtSec;
-        if (b.pulseTimer <= 0) {
-          b.pulse = 1;
-          b.pulseTimer = 4 + Math.random() * 8;
-        }
-        b.pulse *= Math.pow(0.5, dtSec * 1.2); // decay ~1.2/sec
-
-        const breath = 1 + Math.sin(timeSec * 0.5 + b.phase) * 0.05;
-        b.r = b.baseR * breath * (1 + b.pulse * 0.35);
-
-        // ----- Hue: thermal + hover response -----
+        // Hover Response
         let hueTarget = BASE_HUE + (HOT_HUE - BASE_HUE) * b.temp;
         if (m.active) {
           const dx = b.x - m.x;
@@ -212,79 +178,42 @@ const ParticleBackground = () => {
           if (d2 < mouseInfluence * mouseInfluence) {
             const k = 1 - Math.sqrt(d2) / mouseInfluence;
             hueTarget = hueTarget + (HOVER_HUE - hueTarget) * k;
+            // Subtle "attraction" to mouse for gooey feel
+            b.vx -= dx * 0.0001;
+            b.vy -= dy * 0.0001;
           }
         }
-        b.targetHue = hueTarget;
-        b.hue += (b.targetHue - b.hue) * Math.min(1, dtSec * 3);
-
-        // ----- Shedding: large blobs occasionally spawn a small droplet -----
-        b.shedTimer -= dtSec;
-        if (
-          b.shedTimer <= 0 &&
-          b.baseR > Math.min(w, h) * 0.11 &&
-          blobs.length < 16
-        ) {
-          b.shedTimer = 8 + Math.random() * 12;
-          // Shed upward if hot, downward if cool
-          const dir = b.temp > 0.5 ? -1 : 1;
-          const droplet = makeBlob({
-            x: b.x + (Math.random() - 0.5) * b.r * 0.4,
-            y: b.y + dir * b.r * 0.6,
-            vx: (Math.random() - 0.5) * 0.15,
-            vy: dir * 0.25,
-            baseR: b.baseR * (0.35 + Math.random() * 0.2),
-          });
-          droplet.temp = b.temp;
-          droplet.tempDir = b.tempDir;
-          droplet.hue = b.hue;
-          blobs.push(droplet);
-          // Parent slightly shrinks then recovers
-          b.baseR *= 0.92;
+        
+        b.hue += (hueTarget - b.hue) * 0.1;
+        
+        // Pulse Logic
+        b.pulseTimer -= dtSec;
+        if (b.pulseTimer <= 0) {
+          b.pulse = 1;
+          b.pulseTimer = 5 + Math.random() * 10;
         }
+        b.pulse *= 0.96;
+        b.r = b.baseR * (1 + b.pulse * 0.15 + Math.sin(timeSec + b.phase) * 0.03);
 
         drawBlob(b);
       }
-
-      ctx.globalCompositeOperation = "source-over";
-      ctx.filter = "none";
     };
 
     if (reduceMotion) {
-      drawFrame(0, 0, 0);
-      return () => {
-        window.removeEventListener("resize", resize);
-        document.removeEventListener("visibilitychange", onVisibility);
-      };
+      drawFrame(0, 0);
+      return;
     }
 
-    const targetFrameMs = lowEnd ? 1000 / 40 : 1000 / 60;
-    let lastT = performance.now();
-    let acc = 0;
-
     const animate = (t: number) => {
-      const delta = t - lastT;
-      lastT = t;
+      const dtSec = 0.016; // Stable step for physics
+      drawFrame(t * 0.001, dtSec);
       animRef.current = requestAnimationFrame(animate);
-
-      if (!visibleRef.current) return;
-      acc += delta;
-      if (acc < targetFrameMs) return;
-      const dt = Math.min(acc / 16.6667, 2);
-      const dtSec = acc / 1000;
-      acc = 0;
-
-      drawFrame(t * 0.001, dt, dtSec);
     };
     animRef.current = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", resize);
-      document.removeEventListener("visibilitychange", onVisibility);
-      if (!isCoarse) {
-        window.removeEventListener("pointermove", onPointer);
-        window.removeEventListener("pointerleave", onLeave);
-      }
     };
   }, []);
 
@@ -294,8 +223,7 @@ const ParticleBackground = () => {
       aria-hidden="true"
       className="fixed inset-0 pointer-events-none z-0"
       style={{
-        opacity: 0.85,
-        imageRendering: "auto",
+        opacity: 0.6,
         mixBlendMode: "screen",
       }}
     />

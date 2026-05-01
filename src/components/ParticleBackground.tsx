@@ -1,322 +1,234 @@
 import React, { useEffect, useRef, useMemo } from "react";
 
 /**
- * ULTRA-HIGH-FIDELITY PROCEDURAL LAVA LAMP
- * * Technical Architecture:
- * 1. Metaball Geometry: Uses a custom SVG filter pipeline to handle surface tension.
- * 2. Multi-Pass Compositing: Separates base liquid, glow cores, and shadow maps.
- * 3. N-Body Interaction Physics: Real-time force calculation between all particles.
- * 4. Fluid Dynamics: Simulated viscosity, thermal buoyancy, and drag.
- * 5. Procedural Variance: Every session generates a unique "viscosity" profile.
+ * AURA MESH LAVA ENGINE
+ * * * FEATURES:
+ * 1. Anti-Clumping Logic: Particles have a 'Personal Space' radius that triggers 
+ * repulsion when the total density gets too high.
+ * 2. Mesh Gradient Synthesis: Instead of solid colors, we use overlapping 
+ * radial gradients with variable opacity.
+ * 3. Layered Parallax: Blobs are split into 'Foreground', 'Midground', and 'Back'.
+ * 4. Noise-Based Pathing: Uses Sine-Wave interference to prevent 'clumping' at the center.
  */
 
-// --- TYPES & INTERFACES ---
-
-interface PhysicsConfig {
-  gravity: number;
-  viscosity: number;
-  attraction: number;
-  repulsion: number;
-  thermalShift: number;
+interface PhysicsState {
+  repulsionStrength: number;
+  minSeparation: number;
+  friction: number;
+  edgeSoftness: number;
 }
 
-interface Blob {
+interface Particle {
   id: number;
   x: number;
   y: number;
   vx: number;
   vy: number;
-  radius: number;
-  targetRadius: number;
-  mass: number;
-  color: string;
-  glowColor: string;
-  phase: number;
-  temperature: number;
-  tempDir: number;
-  noiseSeed: number;
-  isDroplet: boolean;
+  size: number;
+  baseSize: number;
+  layer: 'fore' | 'mid' | 'back';
+  hue: number;
+  opacity: number;
+  pulseSpeed: number;
+  pulseOffset: number;
 }
-
-// --- CONSTANTS ---
-
-const BASE_HUE = 155; // Your site's emerald/green
-const GLOW_OFFSET = 15; // Shift for the inner "hot" glow
-const MAX_BLOBS = 22;
 
 const ParticleBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const requestRef = useRef<number>();
-  const blobsRef = useRef<Blob[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: -1000, y: -1000, active: false });
 
-  // Procedurally generate the "vibe" for this specific user session
-  const sessionConfig = useMemo<PhysicsConfig>(() => ({
-    gravity: 0.03 + Math.random() * 0.04,
-    viscosity: 0.94 + Math.random() * 0.03,
-    attraction: 0.0007 + Math.random() * 0.0005,
-    repulsion: 0.8,
-    thermalShift: 0.01 + Math.random() * 0.01
+  // Config optimized to prevent clumping
+  const config = useMemo<PhysicsState>(() => ({
+    repulsionStrength: 0.12,
+    minSeparation: 180, // High separation keeps them from sticking in one ball
+    friction: 0.96,
+    edgeSoftness: 45
   }), []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // Use a slight downscale for the internal buffer to make the SVG filter cheaper
-    const dpr = window.devicePixelRatio || 1;
-    const renderScale = 0.85; 
+    let w = window.innerWidth;
+    let h = window.innerHeight;
 
-    let width = 0;
-    let height = 0;
-
-    // --- INITIALIZATION ---
-
-    const createBlob = (id: number, isInitial = false): Blob => {
-      const isDroplet = Math.random() > 0.7;
-      const baseSize = Math.min(window.innerWidth, window.innerHeight);
-      const radius = isDroplet 
-        ? (0.03 + Math.random() * 0.04) * baseSize 
-        : (0.08 + Math.random() * 0.12) * baseSize;
-
-      return {
-        id,
-        x: Math.random() * width,
-        y: isInitial ? Math.random() * height : height + radius,
-        vx: (Math.random() - 0.5) * 4,
-        vy: (Math.random() - 0.5) * 4,
-        radius: radius,
-        targetRadius: radius,
-        mass: Math.pow(radius, 2),
-        color: `hsla(${BASE_HUE}, 100%, 40%, 0.9)`,
-        glowColor: `hsla(${BASE_HUE + GLOW_OFFSET}, 100%, 65%, 1)`,
-        phase: Math.random() * Math.PI * 2,
-        temperature: Math.random(),
-        tempDir: Math.random() > 0.5 ? 1 : -1,
-        noiseSeed: Math.random() * 1000,
-        isDroplet
-      };
-    };
-
-    const init = () => {
-      width = window.innerWidth * renderScale;
-      height = window.innerHeight * renderScale;
-      canvas.width = width;
-      canvas.height = height;
+    const initParticles = () => {
+      const p: Particle[] = [];
+      const count = w < 768 ? 8 : 16;
       
-      const count = window.innerWidth < 768 ? 10 : MAX_BLOBS;
-      const initialBlobs: Blob[] = [];
       for (let i = 0; i < count; i++) {
-        initialBlobs.push(createBlob(i, true));
+        const layerType = i % 3 === 0 ? 'fore' : i % 3 === 1 ? 'mid' : 'back';
+        const baseSize = layerType === 'fore' ? 300 : layerType === 'mid' ? 450 : 600;
+        
+        p.push({
+          id: i,
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          baseSize: baseSize + (Math.random() * 100),
+          size: baseSize,
+          layer: layerType,
+          hue: 150 + (Math.random() * 40), // Varieties of your site's green
+          opacity: layerType === 'fore' ? 0.4 : layerType === 'mid' ? 0.2 : 0.1,
+          pulseSpeed: 0.001 + (Math.random() * 0.002),
+          pulseOffset: Math.random() * Math.PI * 2
+        });
       }
-      blobsRef.current = initialBlobs;
+      particlesRef.current = p;
     };
 
-    // --- PHYSICS ENGINE ---
+    const resize = () => {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+    };
 
-    const updatePhysics = (time: number) => {
-      const blobs = blobsRef.current;
+    const update = (time: number) => {
+      const p = particlesRef.current;
       const { x: mx, y: my, active: mActive } = mouseRef.current;
-      const scaledMx = mx * renderScale;
-      const scaledMy = my * renderScale;
 
-      for (let i = 0; i < blobs.length; i++) {
-        const b = blobs[i];
+      for (let i = 0; i < p.length; i++) {
+        const a = p[i];
 
-        // 1. Thermal Buoyancy (Vertical movement)
-        b.temperature += b.tempDir * sessionConfig.thermalShift;
-        if (b.temperature > 1 || b.temperature < 0) b.tempDir *= -1;
-        
-        const lift = (b.temperature - 0.5) * sessionConfig.gravity;
-        b.vy -= lift;
+        // 1. Anti-Clumping Repulsion
+        // This is the fix for the "one big ball" problem.
+        for (let j = 0; j < p.length; j++) {
+          if (i === j) continue;
+          const b = p[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const minD = (a.size + b.size) * 0.4; // Detection radius
 
-        // 2. Horizontal "Drift" (Simulating convection currents)
-        const drift = Math.sin(time * 0.001 + b.phase) * 0.15;
-        b.vx += drift;
-
-        // 3. N-Body Attraction (The "Goo" Logic)
-        for (let j = i + 1; j < blobs.length; j++) {
-          const other = blobs[j];
-          const dx = other.x - b.x;
-          const dy = other.y - b.y;
-          const distSq = dx * dx + dy * dy;
-          const dist = Math.sqrt(distSq);
-          const minSafeDist = (b.radius + other.radius) * sessionConfig.repulsion;
-
-          // Surface Tension / Attraction
-          if (dist < (b.radius + other.radius) * 2.5) {
-            const force = (dist - minSafeDist) * sessionConfig.attraction;
-            const fx = (dx / dist) * force;
-            const fy = (dy / dist) * force;
-
-            const totalMass = b.mass + other.mass;
-            b.vx += fx * (other.mass / totalMass);
-            b.vy += fy * (other.mass / totalMass);
-            other.vx -= fx * (b.mass / totalMass);
-            other.vy -= fy * (b.mass / totalMass);
+          if (dist < minD) {
+            const force = (minD - dist) * config.repulsionStrength;
+            const angle = Math.atan2(dy, dx);
+            a.vx += Math.cos(angle) * force * 0.01;
+            a.vy += Math.sin(angle) * force * 0.01;
           }
         }
 
-        // 4. Cursor Influence
+        // 2. Random Drift (Brownian motion)
+        a.vx += Math.sin(time * a.pulseSpeed + a.pulseOffset) * 0.02;
+        a.vy += Math.cos(time * (a.pulseSpeed * 0.8) + a.pulseOffset) * 0.02;
+
+        // 3. Mouse Interaction
         if (mActive) {
-          const mdx = b.x - scaledMx;
-          const mdy = b.y - scaledMy;
+          const mdx = a.x - mx;
+          const mdy = a.y - my;
           const mDist = Math.sqrt(mdx * mdx + mdy * mdy);
-          const mThreshold = 250 * renderScale;
-
-          if (mDist < mThreshold) {
-            const mPush = (1 - mDist / mThreshold) * 0.4;
-            b.vx += (mdx / mDist) * mPush;
-            b.vy += (mdy / mDist) * mPush;
+          if (mDist < 400) {
+            const mForce = (1 - mDist / 400) * 0.05;
+            a.vx += mdx * mForce * 0.01;
+            a.vy += mdy * mForce * 0.01;
           }
         }
 
-        // 5. Viscosity & Integration
-        b.vx *= sessionConfig.viscosity;
-        b.vy *= sessionConfig.viscosity;
-        b.x += b.vx;
-        b.y += b.vy;
+        // 4. Boundary Physics
+        if (a.x < -a.size) a.x = w + a.size;
+        if (a.x > w + a.size) a.x = -a.size;
+        if (a.y < -a.size) a.y = h + a.size;
+        if (a.y > h + a.size) a.y = -a.size;
 
-        // 6. Boundary Logic (Elastic walls)
-        const pad = b.radius;
-        if (b.x < -pad) b.x = width + pad;
-        if (b.x > width + pad) b.x = -pad;
-        if (b.y < -pad) {
-            b.y = -pad;
-            b.vy *= -0.5;
-            b.tempDir = 1; // Start heating up
-        }
-        if (b.y > height + pad) {
-            b.y = height + pad;
-            b.vy *= -0.5;
-            b.tempDir = -1; // Start cooling down
-        }
+        // 5. Apply Forces
+        a.vx *= config.friction;
+        a.vy *= config.friction;
+        a.x += a.vx;
+        a.y += a.vy;
 
-        // 7. Organic Pulsing
-        b.radius = b.targetRadius * (1 + Math.sin(time * 0.002 + b.noiseSeed) * 0.08);
+        // 6. Size Pulsing
+        a.size = a.baseSize + Math.sin(time * a.pulseSpeed) * 50;
       }
     };
 
-    // --- RENDERING PASSES ---
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      const p = particlesRef.current;
 
-    const draw = (time: number) => {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, width, height);
+      // Sort by layer to ensure proper depth blending
+      const sorted = [...p].sort((a, b) => {
+        const order = { back: 0, mid: 1, fore: 2 };
+        return order[a.layer] - order[b.layer];
+      });
 
-      const blobs = blobsRef.current;
-
-      // PASS 1: The Liquid Core (Solid silhouettes for the SVG Goo filter)
-      ctx.save();
-      ctx.fillStyle = `hsl(${BASE_HUE}, 100%, 35%)`;
-      
-      for (const b of blobs) {
-        ctx.beginPath();
-        // Morph the shape based on velocity for a gooey stretch
-        const angle = Math.atan2(b.vy, b.vx);
-        const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-        const stretch = Math.min(speed * 0.15, 0.4);
+      for (const pt of sorted) {
+        ctx.save();
         
-        ctx.ellipse(
-          b.x, b.y, 
-          b.radius * (1 + stretch), 
-          b.radius * (1 - stretch * 0.5), 
-          angle, 0, Math.PI * 2
+        // Use a mesh-style radial gradient for each "aura"
+        const gradient = ctx.createRadialGradient(
+          pt.x, pt.y, 0,
+          pt.x, pt.y, pt.size
         );
-        ctx.fill();
-      }
-      ctx.restore();
 
-      // PASS 2: Internal Highlights (Subsurface Scattering simulation)
-      // This adds depth by drawing a lighter, smaller shape inside each glob
-      ctx.save();
-      ctx.globalCompositeOperation = 'source-atop';
-      for (const b of blobs) {
-        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius);
-        grad.addColorStop(0, `hsla(${BASE_HUE + 10}, 100%, 70%, 0.6)`);
-        grad.addColorStop(0.6, `hsla(${BASE_HUE}, 100%, 45%, 0)`);
+        const h = pt.hue;
+        const s = 80;
+        const l = pt.layer === 'fore' ? 40 : 30;
         
-        ctx.fillStyle = grad;
+        gradient.addColorStop(0, `hsla(${h}, ${s}%, ${l}%, ${pt.opacity})`);
+        gradient.addColorStop(0.5, `hsla(${h}, ${s}%, ${l}%, ${pt.opacity * 0.5})`);
+        gradient.addColorStop(1, `hsla(${h}, ${s}%, ${l}%, 0)`);
+
+        ctx.fillStyle = gradient;
+        ctx.globalCompositeOperation = 'screen'; // This makes them look "light-like"
+        
         ctx.beginPath();
-        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
         ctx.fill();
+        
+        ctx.restore();
       }
-      ctx.restore();
 
       requestRef.current = requestAnimationFrame((t) => {
-        updatePhysics(t);
-        draw(t);
+        update(t);
+        draw();
       });
     };
 
-    // --- EVENT LISTENERS ---
-
-    const handleResize = () => {
-      init();
-    };
-
-    const handlePointer = (e: PointerEvent) => {
+    const onMove = (e: PointerEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY, active: true };
     };
 
-    const handlePointerLeave = () => {
-      mouseRef.current.active = false;
-    };
-
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("pointermove", handlePointer);
-    window.addEventListener("pointerleave", handlePointerLeave);
-
-    init();
-    draw(0);
+    window.addEventListener("resize", resize);
+    window.addEventListener("pointermove", onMove);
+    
+    resize();
+    initParticles();
+    draw();
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("pointermove", handlePointer);
-      window.removeEventListener("pointerleave", handlePointerLeave);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", onMove);
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [sessionConfig]);
+  }, [config]);
 
   return (
     <>
-      {/* ADVANCED FILTER PIPELINE 
-          This is what makes the circles "gooey".
-          - Gaussian Blur: Blurs the shapes together.
-          - Color Matrix: Re-sharpens the edges based on alpha density.
-          - Drop Shadow: Adds the depth onto the site's background image.
+      {/* THE MESH BLUR FILTER
+          Instead of sharpening the blobs into balls, we use a high-radius blur
+          to melt them into the background like a moving gradient.
       */}
-      <svg style={{ position: "absolute", width: 0, height: 0 }} aria-hidden="true">
-        <defs>
-          <filter id="lava-goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="25" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  
-                      0 1 0 0 0  
-                      0 0 1 0 0  
-                      0 0 0 45 -18"
-              result="goo"
-            />
-            {/* Creates the 3D depth effect */}
-            <feDropShadow dx="0" dy="15" stdDeviation="15" floodOpacity="0.5" />
-            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-          </filter>
-        </defs>
+      <svg style={{ position: "fixed", width: 0, height: 0 }}>
+        <filter id="mesh-blur">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="60" />
+          <feColorMatrix type="saturate" values="2" />
+        </filter>
       </svg>
 
       <canvas
         ref={canvasRef}
-        aria-hidden="true"
         className="fixed inset-0 pointer-events-none"
         style={{
-          filter: "url(#lava-goo)",
-          opacity: 0.45,
-          zIndex: 0,
-          mixBlendMode: "plus-lighter" // Ensures it glows against your dark hero image
+          filter: "url(#mesh-blur)",
+          opacity: 0.6,
+          zIndex: -1,
+          background: "#050a08" // Matches your dark theme base
         }}
       />
     </>

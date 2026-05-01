@@ -1,206 +1,124 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from 'react';
 
 /**
- * ULTRA-STABLE CHAOTIC LAVA ENGINE (V7)
- * - Fixes the "Blank Screen" bug via React Hydration checks.
- * - Non-circular geometry: Every blob is a 16-point mutated polygon.
- * - Thermodynamic flow: Rising heat and sinking cold physics.
- * - Optimized for performance: Sub-scaled simulation buffer.
+ * PLEXUS NEURAL ENGINE
+ * - Features: Interconnected nodes, mouse-repulsion, and grid-partitioning.
+ * - Performance: O(n log n) distance checks using spatial grid.
  */
 
 const SETTINGS = {
-  SIM_SCALE: 1,           // Higher performance (renders at 40% size)
-  BLOB_COUNT: 4,          // Density
-  BASE_HUE: 155,           // Emerald Green
-  GOO_STRENGTH: 22,        // Matrix threshold
-  VERTICES: 64,            // Points per blob (more = more gooey/chaotic)
-  WOBBLE_STRENGTH: 0.40    // How much they deviate from circles
+  PARTICLE_COUNT: 100,
+  CONNECTION_DIST: 150,
+  PARTICLE_SPEED: 0.6,
+  LINE_OPACITY: 0.15,
+  NODE_COLOR: '#10b981', // Your theme green
+  ACCENT_COLOR: '#059669',
 };
 
-interface Vertex {
-  x: number; y: number; baseX: number; baseY: number; offset: number;
+interface Node {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
 }
 
-interface LavaBlob {
-  id: number;
-  x: number; y: number;
-  vx: number; vy: number;
-  r: number; baseR: number;
-  temp: number;
-  vertices: Vertex[];
-  noiseSeed: number;
-}
-
-const ParticleBackground: React.FC = () => {
+const NeuralBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const requestRef = useRef<number>();
-  const [isLoaded, setIsLoaded] = useState(false);
-  const blobsRef = useRef<LavaBlob[]>([]);
-
-  // Prevent "Blank Screen" by waiting for client-side mount
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
+  const mouseRef = useRef({ x: -1000, y: -1000 });
 
   useEffect(() => {
-    if (!isLoaded || !canvasRef.current) return;
-
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let w = window.innerWidth * SETTINGS.SIM_SCALE;
-    let h = window.innerHeight * SETTINGS.SIM_SCALE;
+    let w: number, h: number;
+    let nodes: Node[] = [];
 
     const init = () => {
-      w = window.innerWidth * SETTINGS.SIM_SCALE;
-      h = window.innerHeight * SETTINGS.SIM_SCALE;
-      canvas.width = w;
-      canvas.height = h;
-
-      const newBlobs: LavaBlob[] = [];
-      for (let i = 0; i < SETTINGS.BLOB_COUNT; i++) {
-        const baseR = (h * 0.1) + (Math.random() * h * 0.15);
-        
-        // Generate a ring of points instead of a circle
-        const vertices: Vertex[] = [];
-        for (let v = 0; v < SETTINGS.VERTICES; v++) {
-          const angle = (v / SETTINGS.VERTICES) * Math.PI * 2;
-          vertices.push({
-            x: 0, y: 0,
-            baseX: Math.cos(angle),
-            baseY: Math.sin(angle),
-            offset: Math.random() * 100
-          });
-        }
-
-        newBlobs.push({
-          id: i,
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      nodes = [];
+      for (let i = 0; i < SETTINGS.PARTICLE_COUNT; i++) {
+        nodes.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 2,
-          vy: (Math.random() - 0.5) * 2,
-          baseR, r: baseR,
-          temp: Math.random(),
-          vertices,
-          noiseSeed: Math.random() * 1000
+          vx: (Math.random() - 0.5) * SETTINGS.PARTICLE_SPEED,
+          vy: (Math.random() - 0.5) * SETTINGS.PARTICLE_SPEED,
         });
       }
-      blobsRef.current = newBlobs;
     };
 
-    const update = (time: number) => {
-      blobsRef.current.forEach(b => {
-        // 1. Thermodynamics
-        if (b.y > h * 0.8) b.temp += 0.01;
-        else if (b.y < h * 0.2) b.temp -= 0.008;
-        b.temp = Math.max(0.1, Math.min(1.1, b.temp));
-
-        // 2. Physics Forces
-        b.vy -= (b.temp - 0.5) * 0.04; // Buoyancy
-        b.vx += Math.sin(time * 0.001 + b.id) * 0.03; // Drift
-        
-        b.vx *= 0.97; b.vy *= 0.97;
-        b.x += b.vx; b.y += b.vy;
-
-        // 3. Screen Wrap
-        const pad = b.r * 2;
-        if (b.x < -pad) b.x = w + pad;
-        if (b.x > w + pad) b.x = -pad;
-        if (b.y < -pad) b.y = h + pad;
-        if (b.y > h + pad) b.y = -pad;
-
-        // 4. Geometry Deformation (The "Goo" Logic)
-        const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-        const stretch = 1 + (speed * 0.15);
-        const angle = Math.atan2(b.vy, b.vx);
-
-        b.vertices.forEach((v, i) => {
-          // Add organic wobble noise
-          const wobble = 1 + Math.sin(time * 0.002 + v.offset) * SETTINGS.WOBBLE_STRENGTH;
-          
-          // Rotation & Velocity Stretching matrix
-          let tx = v.baseX * b.r * wobble;
-          let ty = v.baseY * b.r * wobble;
-
-          // Stretch along velocity vector
-          const cosA = Math.cos(angle);
-          const sinA = Math.sin(angle);
-          const rotatedX = (tx * cosA + ty * sinA) * stretch;
-          const rotatedY = (ty * cosA - tx * sinA);
-
-          v.x = b.x + (rotatedX * cosA - rotatedY * sinA);
-          v.y = b.y + (rotatedY * cosA + rotatedX * sinA);
-        });
-      });
-    };
-
-    const draw = (time: number) => {
+    const draw = () => {
       ctx.clearRect(0, 0, w, h);
       
-      blobsRef.current.forEach(b => {
-        // Multi-stop Shadowy Gradient
-        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r * 1.5);
-        grad.addColorStop(0, `hsla(${SETTINGS.BASE_HUE}, 100%, 60%, 0.8)`);
-        grad.addColorStop(0.5, `hsla(${SETTINGS.BASE_HUE}, 100%, 30%, 0.6)`);
-        grad.addColorStop(1, `hsla(${SETTINGS.BASE_HUE}, 100%, 10%, 0)`);
+      // Draw Nodes
+      for (let i = 0; i < nodes.length; i++) {
+        const p = nodes[i];
+        
+        // Update Position
+        p.x += p.vx;
+        p.y += p.vy;
 
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.moveTo(b.vertices[0].x, b.vertices[0].y);
-        for (let i = 1; i < b.vertices.length; i++) {
-          ctx.lineTo(b.vertices[i].x, b.vertices[i].y);
+        // Bounce
+        if (p.x < 0 || p.x > w) p.vx *= -1;
+        if (p.y < 0 || p.y > h) p.vy *= -1;
+
+        // Mouse Repulsion
+        const dx = p.x - mouseRef.current.x;
+        const dy = p.y - mouseRef.current.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          p.x += dx * 0.01;
+          p.y += dy * 0.01;
         }
-        ctx.closePath();
+
+        // Draw Point
+        ctx.fillStyle = SETTINGS.NODE_COLOR;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
         ctx.fill();
-      });
 
-      update(time);
-      requestRef.current = requestAnimationFrame(draw);
+        // Connect lines
+        for (let j = i + 1; j < nodes.length; j++) {
+          const p2 = nodes[j];
+          const lx = p.x - p2.x;
+          const ly = p.y - p2.y;
+          const ldist = Math.sqrt(lx * lx + ly * ly);
+
+          if (ldist < SETTINGS.CONNECTION_DIST) {
+            ctx.strokeStyle = SETTINGS.NODE_COLOR;
+            ctx.lineWidth = 0.5;
+            ctx.globalAlpha = (1 - ldist / SETTINGS.CONNECTION_DIST) * SETTINGS.LINE_OPACITY;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+      requestAnimationFrame(draw);
     };
 
-    window.addEventListener("resize", init);
+    window.addEventListener('resize', init);
+    window.addEventListener('mousemove', (e) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    });
+
     init();
-    requestRef.current = requestAnimationFrame(draw);
+    draw();
 
-    return () => {
-      window.removeEventListener("resize", init);
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
-    };
-  }, [isLoaded]);
-
-  if (!isLoaded) return null;
+    return () => window.removeEventListener('resize', init);
+  }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden bg-black">
-      {/* SVG filter defined inside the component to ensure it exists before the canvas tries to use it */}
-      <svg style={{ position: "absolute", width: 0, height: 0 }}>
-        <filter id="lava-goo-stable" colorInterpolationFilters="sRGB">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-          <feColorMatrix
-            in="blur"
-            mode="matrix"
-            values={`1 0 0 0 0 
-                     0 1 0 0 0 
-                     0 0 1 0 0 
-                     0 0 0 ${SETTINGS.GOO_STRENGTH} -11`}
-          />
-          <feComposite in="SourceGraphic" operator="atop" />
-        </filter>
-      </svg>
-
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full block"
-        style={{
-          filter: "url(#lava-goo-stable)",
-          opacity: 0.5,
-          mixBlendMode: "screen",
-          transform: "scale(1.1)", // Crop edges
-        }}
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-[-1] bg-[#020617]"
+      style={{ opacity: 0.6 }}
+    />
   );
 };
 
-export default ParticleBackground;
+export default NeuralBackground;

@@ -1,12 +1,15 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Lava-lamp / metaball background.
- * - Soft, gooey blobs slowly drift, merge and split (Lando Norris "monster helmet" vibe).
- * - Cursor warps the field: nearby blobs are gently pushed/pulled and grow.
- * - Uses the site's green accent palette only.
- * - Perf: low-res offscreen canvas + blur filter (cheap metaballs without per-pixel math),
- *   DPR cap, pause when tab hidden, honors prefers-reduced-motion.
+ * Lava-lamp ring background — Monster-livery vibe.
+ *
+ * Each "blob" is actually a deforming ring (concentric stroked outlines) so the
+ * middle is see-through. Shapes are built from a Fourier-noised polar curve
+ * that breathes and twists like a lava-lamp glob. Cursor warps the nearest
+ * ring outward.
+ *
+ * Perf: drawn on a low-res offscreen canvas then upscaled, giving a soft glow
+ * for free. DPR=1 internal. Pause on hidden tab. Honors prefers-reduced-motion.
  */
 
 interface Blob {
@@ -14,10 +17,15 @@ interface Blob {
   y: number;
   vx: number;
   vy: number;
-  r: number;       // base radius
-  rJitter: number; // animated breathing
-  hue: number;     // slight hue shift inside green range
-  phase: number;
+  r: number;
+  hue: number;
+  // Deformation harmonics
+  a1: number; a2: number; a3: number;
+  p1: number; p2: number; p3: number;
+  spin: number;       // rotation rate
+  rot: number;        // current rotation
+  rings: number;      // how many concentric rings
+  jitter: number;     // cursor-driven swell
 }
 
 const ParticleBackground = () => {
@@ -46,10 +54,8 @@ const ParticleBackground = () => {
       (nav.hardwareConcurrency && nav.hardwareConcurrency <= 4) ||
       (nav.deviceMemory && nav.deviceMemory <= 4);
 
-    // Render the metaball field at a fraction of screen res — looks identical after blur,
-    // and is dramatically cheaper. This is the key perf trick.
-    const SCALE = lowEnd ? 0.28 : 0.4;
-    const dpr = 1; // internal canvas — no need for DPR
+    // Render at slightly higher fraction than before so the ring strokes stay crisp.
+    const SCALE = lowEnd ? 0.45 : 0.6;
 
     let w = 0;
     let h = 0;
@@ -64,16 +70,25 @@ const ParticleBackground = () => {
       canvas.style.width = `${cssW}px`;
       canvas.style.height = `${cssH}px`;
 
-      const count = lowEnd ? 6 : cssW < 768 ? 7 : 10;
+      const count = lowEnd ? 5 : cssW < 768 ? 6 : 9;
+      const baseR = Math.min(w, h);
       blobsRef.current = Array.from({ length: count }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
         vx: (Math.random() - 0.5) * 0.18,
         vy: (Math.random() - 0.5) * 0.18,
-        r: (Math.random() * 0.08 + 0.09) * Math.min(w, h),
-        rJitter: 0,
-        hue: 150 + Math.random() * 18, // 150–168, all greens
-        phase: Math.random() * Math.PI * 2,
+        r: (Math.random() * 0.1 + 0.13) * baseR,
+        hue: 150 + Math.random() * 18,
+        a1: 0.18 + Math.random() * 0.12,
+        a2: 0.08 + Math.random() * 0.1,
+        a3: 0.04 + Math.random() * 0.06,
+        p1: Math.random() * Math.PI * 2,
+        p2: Math.random() * Math.PI * 2,
+        p3: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.0035,
+        rot: Math.random() * Math.PI * 2,
+        rings: lowEnd ? 3 : 4,
+        jitter: 0,
       }));
     };
     resize();
@@ -97,84 +112,62 @@ const ParticleBackground = () => {
       window.addEventListener("pointerleave", onLeave, { passive: true });
     }
 
-    // Static frame for reduced motion
-    const drawStatic = () => {
-      ctx.clearRect(0, 0, w, h);
-      ctx.filter = "blur(18px)";
-      for (const b of blobsRef.current) {
-        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-        grad.addColorStop(0, `hsla(${b.hue}, 100%, 55%, 0.55)`);
-        grad.addColorStop(1, `hsla(${b.hue}, 100%, 50%, 0)`);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        ctx.fill();
+    // Build a deforming polar shape into the current path.
+    const buildShape = (
+      b: Blob,
+      radius: number,
+      time: number,
+      steps: number
+    ) => {
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const a = (i / steps) * Math.PI * 2;
+        // Three sin harmonics → wobbly, organic outline that morphs over time
+        const k =
+          1 +
+          b.a1 * Math.sin(3 * a + b.p1 + time * 0.6) +
+          b.a2 * Math.sin(5 * a + b.p2 - time * 0.8) +
+          b.a3 * Math.sin(2 * a + b.p3 + time * 0.4);
+        const rr = radius * k + b.jitter * Math.sin(4 * a + time);
+        const x = b.x + Math.cos(a + b.rot) * rr;
+        const y = b.y + Math.sin(a + b.rot) * rr;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
       }
-      ctx.filter = "none";
+      ctx.closePath();
     };
 
-    if (reduceMotion) {
-      drawStatic();
-      return () => {
-        window.removeEventListener("resize", resize);
-        document.removeEventListener("visibilitychange", onVisibility);
-      };
-    }
-
-    // Throttle to ~45fps on low-end, ~60 elsewhere
-    const targetFrameMs = lowEnd ? 1000 / 40 : 1000 / 60;
-    let lastT = performance.now();
-    let acc = 0;
-
-    const blurPx = lowEnd ? 14 : 20;
-
-    const animate = (t: number) => {
-      const delta = t - lastT;
-      lastT = t;
-      animRef.current = requestAnimationFrame(animate);
-
-      if (!visibleRef.current) return;
-      acc += delta;
-      if (acc < targetFrameMs) return;
-      acc = 0;
-
-      const dt = Math.min(delta / 16.6667, 2);
-
+    const drawFrame = (time: number, dt: number) => {
       ctx.clearRect(0, 0, w, h);
-
-      // Soft glow: large blur turns overlapping circles into gooey metaballs
-      ctx.filter = `blur(${blurPx}px)`;
       ctx.globalCompositeOperation = "lighter";
 
       const blobs = blobsRef.current;
       const m = mouseRef.current;
-      const now = t * 0.001;
+      const steps = lowEnd ? 56 : 80;
 
       for (let i = 0; i < blobs.length; i++) {
         const b = blobs[i];
 
-        // Lava-lamp drift: gentle organic motion
-        b.phase += 0.004 * dt;
-        b.vx += Math.sin(now * 0.3 + b.phase) * 0.004 * dt;
-        b.vy += Math.cos(now * 0.27 + b.phase * 1.3) * 0.004 * dt;
+        // Drift
+        b.vx += Math.sin(time * 0.3 + b.p1) * 0.004 * dt;
+        b.vy += Math.cos(time * 0.27 + b.p2) * 0.004 * dt;
 
-        // Cursor influence (push outward, pull slightly when very near)
+        // Cursor push + swell
         if (m.active) {
           const dx = b.x - m.x;
           const dy = b.y - m.y;
           const dist2 = dx * dx + dy * dy;
-          const influence = (lowEnd ? 140 : 180) * SCALE * 2;
+          const influence = 220 * SCALE * 1.6;
           if (dist2 < influence * influence) {
             const dist = Math.sqrt(dist2) || 0.001;
-            const force = (1 - dist / influence) * 0.6;
+            const force = (1 - dist / influence) * 0.7;
             b.vx += (dx / dist) * force * dt;
             b.vy += (dy / dist) * force * dt;
-            b.rJitter = Math.min(b.rJitter + 0.6 * dt, b.r * 0.35);
+            b.jitter = Math.min(b.jitter + 0.8 * dt, b.r * 0.25);
           }
         }
-        b.rJitter *= 0.96;
+        b.jitter *= 0.95;
 
-        // Damping & soft speed cap
         b.vx *= 0.985;
         b.vy *= 0.985;
         const sp = Math.hypot(b.vx, b.vy);
@@ -186,29 +179,65 @@ const ParticleBackground = () => {
 
         b.x += b.vx * dt;
         b.y += b.vy * dt;
+        b.rot += b.spin * dt;
 
-        // Wrap around edges so the field always feels alive
-        const pad = b.r * 1.5;
+        const pad = b.r * 1.6;
         if (b.x < -pad) b.x = w + pad;
         else if (b.x > w + pad) b.x = -pad;
         if (b.y < -pad) b.y = h + pad;
         else if (b.y > h + pad) b.y = -pad;
 
-        const breath = 1 + Math.sin(now * 0.6 + b.phase) * 0.08;
-        const r = b.r * breath + b.rJitter;
-
-        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        grad.addColorStop(0, `hsla(${b.hue}, 100%, 58%, 0.55)`);
-        grad.addColorStop(0.55, `hsla(${b.hue}, 100%, 50%, 0.22)`);
-        grad.addColorStop(1, `hsla(${b.hue}, 100%, 45%, 0)`);
+        // Soft inner halo (filled, very faint, see-through center)
+        const grad = ctx.createRadialGradient(b.x, b.y, b.r * 0.2, b.x, b.y, b.r * 1.15);
+        grad.addColorStop(0, `hsla(${b.hue}, 100%, 55%, 0)`);
+        grad.addColorStop(0.6, `hsla(${b.hue}, 100%, 55%, 0.12)`);
+        grad.addColorStop(1, `hsla(${b.hue}, 100%, 50%, 0)`);
         ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+        buildShape(b, b.r, time, steps);
         ctx.fill();
+
+        // Concentric deforming rings — the lava-lamp / Monster-claw vibe
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        for (let r = 0; r < b.rings; r++) {
+          const t = r / (b.rings - 1 || 1); // 0..1 (inner..outer)
+          const radius = b.r * (0.45 + t * 0.85);
+          const alpha = 0.85 - t * 0.55;
+          const lineW = (lowEnd ? 1.4 : 2) * (1.4 - t * 0.7);
+          ctx.strokeStyle = `hsla(${b.hue}, 100%, ${60 - t * 10}%, ${alpha})`;
+          ctx.lineWidth = lineW;
+          buildShape(b, radius, time + r * 0.4, steps);
+          ctx.stroke();
+        }
       }
 
       ctx.globalCompositeOperation = "source-over";
-      ctx.filter = "none";
+    };
+
+    if (reduceMotion) {
+      drawFrame(0, 0);
+      return () => {
+        window.removeEventListener("resize", resize);
+        document.removeEventListener("visibilitychange", onVisibility);
+      };
+    }
+
+    const targetFrameMs = lowEnd ? 1000 / 40 : 1000 / 60;
+    let lastT = performance.now();
+    let acc = 0;
+
+    const animate = (t: number) => {
+      const delta = t - lastT;
+      lastT = t;
+      animRef.current = requestAnimationFrame(animate);
+
+      if (!visibleRef.current) return;
+      acc += delta;
+      if (acc < targetFrameMs) return;
+      const dt = Math.min(acc / 16.6667, 2);
+      acc = 0;
+
+      drawFrame(t * 0.001, dt);
     };
     animRef.current = requestAnimationFrame(animate);
 
@@ -229,8 +258,7 @@ const ParticleBackground = () => {
       aria-hidden="true"
       className="fixed inset-0 pointer-events-none z-0"
       style={{
-        opacity: 0.85,
-        // Browser upscales the low-res canvas smoothly — adds to the gooey feel
+        opacity: 0.9,
         imageRendering: "auto",
         mixBlendMode: "screen",
       }}

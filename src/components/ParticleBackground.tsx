@@ -1,90 +1,100 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * LUMINOUS FLOW FIELD (Ultra-Light Edition)
- * - Performance: Near-zero CPU impact (GPU-heavy rendering).
- * - Aesthetic: High-end generative silk / light trails.
- * - Interaction: Flow follows mouse velocity.
+ * SHATTERED PRISM BACKGROUND
+ * - Aesthetic: 3D floating shards / geometric depth.
+ * - Performance: Ultra-optimized (No physics, just trigonometry).
+ * - Interaction: Shards "tilt" toward the mouse.
  */
 
 const SETTINGS = {
-  PARTICLE_COUNT: 40,    // Low count + long trails = high performance
-  MAX_FORCE: 0.1,
-  MAX_SPEED: 2.5,
-  COLOR: '#10b981',      // Emerald Green
-  TRAIL_STRENGTH: 0.08,  // How long the trails last
+  SHARD_COUNT: 35,
+  MAX_SIZE: 40,
+  MIN_SIZE: 15,
+  COLOR: '#10b981', // Your Emerald Green
+  BG: '#020617',
 };
 
-const FlowBackground: React.FC = () => {
+const PrismBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha: false }); // Optimization: disable alpha buffer
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     let w: number, h: number;
-    let particles: any[] = [];
+    let shards: any[] = [];
 
     const init = () => {
       w = canvas.width = window.innerWidth;
       h = canvas.height = window.innerHeight;
-      particles = [];
-      for (let i = 0; i < SETTINGS.PARTICLE_COUNT; i++) {
-        particles.push({
+      shards = [];
+      for (let i = 0; i < SETTINGS.SHARD_COUNT; i++) {
+        shards.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 2,
-          vy: (Math.random() - 0.5) * 2,
-          history: []
+          size: Math.random() * (SETTINGS.MAX_SIZE - SETTINGS.MIN_SIZE) + SETTINGS.MIN_SIZE,
+          speed: 0.2 + Math.random() * 0.5,
+          angle: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.01,
+          sides: Math.floor(Math.random() * 3) + 3, // Randomly Triangles, Squares, or Pentagons
+          opacity: 0.1 + Math.random() * 0.3
         });
       }
     };
 
     const draw = () => {
-      // THE TRICK: Don't clear the screen. Draw a faint black box to "fade" old frames.
-      ctx.fillStyle = `rgba(2, 6, 23, ${SETTINGS.TRAIL_STRENGTH})`;
+      ctx.fillStyle = SETTINGS.BG;
       ctx.fillRect(0, 0, w, h);
 
-      ctx.strokeStyle = SETTINGS.COLOR;
-      ctx.lineWidth = 1.2;
-      ctx.lineCap = 'round';
+      shards.forEach(s => {
+        // Subtle drift
+        s.y -= s.speed;
+        s.angle += s.rotSpeed;
 
-      particles.forEach(p => {
-        // Simple Physics
-        p.x += p.vx;
-        p.y += p.vy;
-
-        // Mouse influence
-        const dx = mouseRef.current.x - p.x;
-        const dy = mouseRef.current.y - p.y;
+        // Mouse "Tilt" calculation
+        const dx = mouseRef.current.x - s.x;
+        const dy = mouseRef.current.y - s.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
+        const tiltX = (dx / w) * 20;
+        const tiltY = (dy / h) * 20;
+
+        // Reset if goes off screen
+        if (s.y < -50) {
+          s.y = h + 50;
+          s.x = Math.random() * w;
+        }
+
+        ctx.save();
+        ctx.translate(s.x + tiltX, s.y + tiltY);
+        ctx.rotate(s.angle);
         
-        if (dist < 200) {
-          p.vx += dx * 0.0005;
-          p.vy += dy * 0.0005;
-        }
-
-        // Speed limit
-        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        if (speed > SETTINGS.MAX_SPEED) {
-          p.vx = (p.vx / speed) * SETTINGS.MAX_SPEED;
-          p.vy = (p.vy / speed) * SETTINGS.MAX_SPEED;
-        }
-
-        // Draw the segment
+        // Draw the polygon
         ctx.beginPath();
-        ctx.moveTo(p.x - p.vx, p.y - p.vy);
-        ctx.lineTo(p.x, p.y);
+        ctx.strokeStyle = SETTINGS.COLOR;
+        ctx.globalAlpha = s.opacity;
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i < s.sides; i++) {
+          const x = s.size * Math.cos((i * 2 * Math.PI) / s.sides);
+          const y = s.size * Math.sin((i * 2 * Math.PI) / s.sides);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        
+        ctx.closePath();
         ctx.stroke();
 
-        // Wrap around edges
-        if (p.x < 0) p.x = w;
-        if (p.x > w) p.x = 0;
-        if (p.y < 0) p.y = h;
-        if (p.y > h) p.y = 0;
+        // Add a subtle "shimmer" dot in the center
+        ctx.beginPath();
+        ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        ctx.fillStyle = SETTINGS.COLOR;
+        ctx.fill();
+        
+        ctx.restore();
       });
 
       requestAnimationFrame(draw);
@@ -108,9 +118,9 @@ const FlowBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[-1] bg-[#020617]"
+      className="fixed inset-0 pointer-events-none z-[-1]"
     />
   );
 };
 
-export default FlowBackground;
+export default PrismBackground;

@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 const SETTINGS = {
   SIM_SCALE: 1,           // Higher performance (renders at 40% size)
-  BLOB_COUNT: 12,          // Density
+  BLOB_COUNT: 4,          // Density
   BASE_HUE: 155,           // Emerald Green
   GOO_STRENGTH: 22,        // Matrix threshold
   VERTICES: 64,            // Points per blob (more = more gooey/chaotic)

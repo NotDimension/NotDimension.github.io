@@ -1,21 +1,20 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * GENERATIVE TOPOGRAPHY
- * - Aesthetic: Flowing 3D terrain / abstract waves.
- * - Performance: Mathematical sine-wave rendering (High FPS).
- * - Interaction: Waves subtly follow mouse movement.
+ * KINETIC MAGNETISM GRID
+ * - Aesthetic: Industrial, tactile, responsive.
+ * - Performance: Static grid (No physics integration needed).
+ * - Interaction: 100% mouse-driven orientation.
  */
 
 const SETTINGS = {
-  LINE_COUNT: 25,        // Number of horizontal ribbons
-  SENSITIVITY: 0.002,    // Speed of flow
-  WAVE_STRENGTH: 60,     // Vertical height of waves
-  COLOR: '#10b981',      // Your emerald green
-  BG: '#020617',         // Dark slate background
+  GRID_GAP: 40,         // Space between receptors
+  LINE_LENGTH: 15,      // Length of each "needle"
+  COLOR: '#10b981',     // Theme Emerald
+  BG: '#020617',        // Dark Slate
 };
 
-const TopoBackground: React.FC = () => {
+const KineticBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
 
@@ -26,7 +25,6 @@ const TopoBackground: React.FC = () => {
     if (!ctx) return;
 
     let w: number, h: number;
-    let tick = 0;
 
     const init = () => {
       w = canvas.width = window.innerWidth;
@@ -34,34 +32,39 @@ const TopoBackground: React.FC = () => {
     };
 
     const draw = () => {
-      tick += 1;
       ctx.fillStyle = SETTINGS.BG;
       ctx.fillRect(0, 0, w, h);
 
-      ctx.lineWidth = 1.5;
-      
-      // Create the "Topographic" layers
-      for (let i = 0; i < SETTINGS.LINE_COUNT; i++) {
-        ctx.beginPath();
-        
-        // Dynamic opacity based on "depth"
-        const opacity = (i / SETTINGS.LINE_COUNT) * 0.4;
-        ctx.strokeStyle = `rgba(16, 185, 129, ${opacity})`;
+      ctx.strokeStyle = SETTINGS.COLOR;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
 
-        // Vertical spacing
-        const baseY = (h / SETTINGS.LINE_COUNT) * i;
-
-        for (let x = 0; x <= w; x += 10) {
-          // The Magic Math: Nested sine waves + Mouse influence
-          const mouseInfluence = (mouseRef.current.x / w) * 2;
-          const distortion = Math.sin(x * 0.005 + tick * SETTINGS.SENSITIVITY + i) * Math.cos(x * 0.002 + i * 0.5) * SETTINGS.WAVE_STRENGTH;
+      // Iterate through the screen in a grid
+      for (let x = SETTINGS.GRID_GAP / 2; x < w; x += SETTINGS.GRID_GAP) {
+        for (let y = SETTINGS.GRID_GAP / 2; y < h; y += SETTINGS.GRID_GAP) {
           
-          const y = baseY + distortion + (mouseRef.current.y * 0.05);
+          // 1. Calculate angle to mouse
+          const dx = mouseRef.current.x - x;
+          const dy = mouseRef.current.y - y;
+          const angle = Math.atan2(dy, dx);
+          
+          // 2. Calculate distance for scale (optional "pinch" effect)
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const strength = Math.min(150 / dist, 2); // Get "excited" when mouse is near
 
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle);
+          
+          // 3. Draw the "Needle"
+          ctx.beginPath();
+          ctx.globalAlpha = Math.max(0.1, 1 - dist / 600); // Fade out far from mouse
+          ctx.moveTo(-SETTINGS.LINE_LENGTH * strength, 0);
+          ctx.lineTo(SETTINGS.LINE_LENGTH * strength, 0);
+          ctx.stroke();
+          
+          ctx.restore();
         }
-        ctx.stroke();
       }
       
       requestAnimationFrame(draw);
@@ -90,4 +93,4 @@ const TopoBackground: React.FC = () => {
   );
 };
 
-export default TopoBackground;
+export default KineticBackground;

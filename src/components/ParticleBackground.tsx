@@ -1,102 +1,86 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * CYBER-GRID TERMINAL BACKGROUND
- * - Unique ASCII-based aesthetic.
- * - Ultra-low CPU usage.
- * - Interactive mouse-glow effect.
+ * FROSTED AURORA MESH
+ * - Unique aesthetic: High-end "Glassmorphism"
+ * - Interactivity: Liquid-style mouse tracking
+ * - Performance: Uses CSS Blur and SVG Noise filters (GPU Accelerated)
  */
 
-const SETTINGS = {
-  FONT_SIZE: 16,
-  COLOR: '#10b981', // Your theme green
-  BG_COLOR: '#020617',
-  CHARACTERS: '01', // You can add 'Minecraft' or other strings here
-  FADE_SPEED: 0.05,
-};
-
-const BinaryBackground: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const AuroraBackground: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let columns: number;
-    let rows: number;
-    let drops: number[];
-
-    const init = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      columns = Math.floor(canvas.width / SETTINGS.FONT_SIZE);
-      rows = Math.floor(canvas.height / SETTINGS.FONT_SIZE);
-      drops = new Array(columns).fill(0);
-    };
-
-    const draw = () => {
-      // Create a fading effect by drawing a semi-transparent rectangle
-      ctx.fillStyle = `rgba(2, 6, 23, ${SETTINGS.FADE_SPEED})`;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.font = `${SETTINGS.FONT_SIZE}px monospace`;
-
-      for (let i = 0; i < drops.length; i++) {
-        const x = i * SETTINGS.FONT_SIZE;
-        const y = drops[i] * SETTINGS.FONT_SIZE;
-
-        // Check distance to mouse for a custom "glow" color
-        const dx = x - mouseRef.current.x;
-        const dy = y - mouseRef.current.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 150) {
-          ctx.fillStyle = '#34d399'; // Brighter green near mouse
-        } else {
-          ctx.fillStyle = SETTINGS.COLOR;
-        }
-
-        const char = SETTINGS.CHARACTERS.charAt(
-          Math.floor(Math.random() * SETTINGS.CHARACTERS.length)
-        );
-
-        ctx.fillText(char, x, y);
-
-        // Reset drop to top randomly after it hits bottom
-        if (y > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    };
-
-    const interval = setInterval(draw, 50);
-
     const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
+      if (!containerRef.current) return;
+      const { clientX, clientY } = e;
+      // Smoothly update CSS variables for the "glow" position
+      containerRef.current.style.setProperty('--mouse-x', `${clientX}px`);
+      containerRef.current.style.setProperty('--mouse-y', `${clientY}px`);
     };
 
-    window.addEventListener('resize', init);
     window.addEventListener('mousemove', handleMouseMove);
-    init();
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('resize', init);
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[-1]"
-      style={{ background: SETTINGS.BG_COLOR }}
-    />
+    <div 
+      ref={containerRef}
+      className="fixed inset-0 z-[-1] bg-[#020617] overflow-hidden"
+    >
+      {/* The "Aurora" Blobs */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Main interactive glow */}
+        <div 
+          className="absolute transition-transform duration-300 ease-out pointer-events-none"
+          style={{
+            left: 'var(--mouse-x)',
+            top: 'var(--mouse-y)',
+            width: '600px',
+            height: '600px',
+            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)',
+            transform: 'translate(-50%, -50%)',
+            filter: 'blur(80px)',
+          }}
+        />
+
+        {/* Static secondary accent - Top Right */}
+        <div 
+          className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(5, 150, 105, 0.1) 0%, transparent 70%)',
+            filter: 'blur(100px)',
+          }}
+        />
+
+        {/* Static secondary accent - Bottom Left */}
+        <div 
+          className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%)',
+            filter: 'blur(120px)',
+          }}
+        />
+      </div>
+
+      {/* THE UNIQUE PART: The Grainy Glass Overlay */}
+      <div className="absolute inset-0 backdrop-blur-[120px] pointer-events-none" />
+      
+      {/* SVG Noise Texture for that premium "paper/film" feel */}
+      <svg className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay">
+        <filter id="noiseFilter">
+          <feTurbulence 
+            type="fractalNoise" 
+            baseFrequency="0.6" 
+            numOctaves="3" 
+            stitchTiles="stitch" 
+          />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+      </svg>
+    </div>
   );
 };
 
-export default BinaryBackground;
+export default AuroraBackground;

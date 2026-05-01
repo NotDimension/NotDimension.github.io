@@ -9,12 +9,12 @@ import React, { useEffect, useRef, useState } from "react";
  */
 
 const SETTINGS = {
-  SIM_SCALE: 0.4,           // Higher performance (renders at 40% size)
-  BLOB_COUNT: 18,          // Density
+  SIM_SCALE: 1,           // Higher performance (renders at 40% size)
+  BLOB_COUNT: 12,          // Density
   BASE_HUE: 155,           // Emerald Green
   GOO_STRENGTH: 22,        // Matrix threshold
-  VERTICES: 16,            // Points per blob (more = more gooey/chaotic)
-  WOBBLE_STRENGTH: 0.25    // How much they deviate from circles
+  VERTICES: 64,            // Points per blob (more = more gooey/chaotic)
+  WOBBLE_STRENGTH: 0.40    // How much they deviate from circles
 };
 
 interface Vertex {

@@ -1,86 +1,93 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * FROSTED AURORA MESH
- * - Unique aesthetic: High-end "Glassmorphism"
- * - Interactivity: Liquid-style mouse tracking
- * - Performance: Uses CSS Blur and SVG Noise filters (GPU Accelerated)
+ * GENERATIVE TOPOGRAPHY
+ * - Aesthetic: Flowing 3D terrain / abstract waves.
+ * - Performance: Mathematical sine-wave rendering (High FPS).
+ * - Interaction: Waves subtly follow mouse movement.
  */
 
-const AuroraBackground: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const SETTINGS = {
+  LINE_COUNT: 25,        // Number of horizontal ribbons
+  SENSITIVITY: 0.002,    // Speed of flow
+  WAVE_STRENGTH: 60,     // Vertical height of waves
+  COLOR: '#10b981',      // Your emerald green
+  BG: '#020617',         // Dark slate background
+};
+
+const TopoBackground: React.FC = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const { clientX, clientY } = e;
-      // Smoothly update CSS variables for the "glow" position
-      containerRef.current.style.setProperty('--mouse-x', `${clientX}px`);
-      containerRef.current.style.setProperty('--mouse-y', `${clientY}px`);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let w: number, h: number;
+    let tick = 0;
+
+    const init = () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
     };
 
+    const draw = () => {
+      tick += 1;
+      ctx.fillStyle = SETTINGS.BG;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.lineWidth = 1.5;
+      
+      // Create the "Topographic" layers
+      for (let i = 0; i < SETTINGS.LINE_COUNT; i++) {
+        ctx.beginPath();
+        
+        // Dynamic opacity based on "depth"
+        const opacity = (i / SETTINGS.LINE_COUNT) * 0.4;
+        ctx.strokeStyle = `rgba(16, 185, 129, ${opacity})`;
+
+        // Vertical spacing
+        const baseY = (h / SETTINGS.LINE_COUNT) * i;
+
+        for (let x = 0; x <= w; x += 10) {
+          // The Magic Math: Nested sine waves + Mouse influence
+          const mouseInfluence = (mouseRef.current.x / w) * 2;
+          const distortion = Math.sin(x * 0.005 + tick * SETTINGS.SENSITIVITY + i) * Math.cos(x * 0.002 + i * 0.5) * SETTINGS.WAVE_STRENGTH;
+          
+          const y = baseY + distortion + (mouseRef.current.y * 0.05);
+
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      
+      requestAnimationFrame(draw);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    window.addEventListener('resize', init);
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    init();
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', init);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
   }, []);
 
   return (
-    <div 
-      ref={containerRef}
-      className="fixed inset-0 z-[-1] bg-[#020617] overflow-hidden"
-    >
-      {/* The "Aurora" Blobs */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Main interactive glow */}
-        <div 
-          className="absolute transition-transform duration-300 ease-out pointer-events-none"
-          style={{
-            left: 'var(--mouse-x)',
-            top: 'var(--mouse-y)',
-            width: '600px',
-            height: '600px',
-            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)',
-            transform: 'translate(-50%, -50%)',
-            filter: 'blur(80px)',
-          }}
-        />
-
-        {/* Static secondary accent - Top Right */}
-        <div 
-          className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(5, 150, 105, 0.1) 0%, transparent 70%)',
-            filter: 'blur(100px)',
-          }}
-        />
-
-        {/* Static secondary accent - Bottom Left */}
-        <div 
-          className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%)',
-            filter: 'blur(120px)',
-          }}
-        />
-      </div>
-
-      {/* THE UNIQUE PART: The Grainy Glass Overlay */}
-      <div className="absolute inset-0 backdrop-blur-[120px] pointer-events-none" />
-      
-      {/* SVG Noise Texture for that premium "paper/film" feel */}
-      <svg className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay">
-        <filter id="noiseFilter">
-          <feTurbulence 
-            type="fractalNoise" 
-            baseFrequency="0.6" 
-            numOctaves="3" 
-            stitchTiles="stitch" 
-          />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
-      </svg>
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-[-1]"
+    />
   );
 };
 
-export default AuroraBackground;
+export default TopoBackground;

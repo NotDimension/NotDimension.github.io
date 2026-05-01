@@ -50,7 +50,7 @@
 }
 
 /* =========================================================
-   HERO BACKGROUND
+   HERO BACKGROUND (Blur Removed)
    ========================================================= */
 .hero-bg {
   position: relative;
@@ -67,6 +67,8 @@
   background-position: center;
   background-repeat: no-repeat;
   z-index: -2;
+  /* Ensure no filter is applied here */
+  filter: none; 
   animation: heroDrift 30s ease-in-out infinite alternate;
   will-change: transform;
 }
@@ -116,7 +118,7 @@
 }
 
 /* =========================================================
-   CAT COMPANION (canvas, frame-swapped in JS)
+   CAT COMPANION
    ========================================================= */
 .cat-container {
   width: 64px;

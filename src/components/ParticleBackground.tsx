@@ -1,30 +1,23 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * PLEXUS NEURAL ENGINE
- * - Features: Interconnected nodes, mouse-repulsion, and grid-partitioning.
- * - Performance: O(n log n) distance checks using spatial grid.
+ * CYBER-GRID TERMINAL BACKGROUND
+ * - Unique ASCII-based aesthetic.
+ * - Ultra-low CPU usage.
+ * - Interactive mouse-glow effect.
  */
 
 const SETTINGS = {
-  PARTICLE_COUNT: 100,
-  CONNECTION_DIST: 150,
-  PARTICLE_SPEED: 0.6,
-  LINE_OPACITY: 0.15,
-  NODE_COLOR: '#10b981', // Your theme green
-  ACCENT_COLOR: '#059669',
+  FONT_SIZE: 16,
+  COLOR: '#10b981', // Your theme green
+  BG_COLOR: '#020617',
+  CHARACTERS: '01', // You can add 'Minecraft' or other strings here
+  FADE_SPEED: 0.05,
 };
 
-interface Node {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-}
-
-const NeuralBackground: React.FC = () => {
+const BinaryBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: -1000, y: -1000 });
+  const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -32,93 +25,78 @@ const NeuralBackground: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let w: number, h: number;
-    let nodes: Node[] = [];
+    let columns: number;
+    let rows: number;
+    let drops: number[];
 
     const init = () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-      nodes = [];
-      for (let i = 0; i < SETTINGS.PARTICLE_COUNT; i++) {
-        nodes.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * SETTINGS.PARTICLE_SPEED,
-          vy: (Math.random() - 0.5) * SETTINGS.PARTICLE_SPEED,
-        });
-      }
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      columns = Math.floor(canvas.width / SETTINGS.FONT_SIZE);
+      rows = Math.floor(canvas.height / SETTINGS.FONT_SIZE);
+      drops = new Array(columns).fill(0);
     };
 
     const draw = () => {
-      ctx.clearRect(0, 0, w, h);
-      
-      // Draw Nodes
-      for (let i = 0; i < nodes.length; i++) {
-        const p = nodes[i];
-        
-        // Update Position
-        p.x += p.vx;
-        p.y += p.vy;
+      // Create a fading effect by drawing a semi-transparent rectangle
+      ctx.fillStyle = `rgba(2, 6, 23, ${SETTINGS.FADE_SPEED})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Bounce
-        if (p.x < 0 || p.x > w) p.vx *= -1;
-        if (p.y < 0 || p.y > h) p.vy *= -1;
+      ctx.font = `${SETTINGS.FONT_SIZE}px monospace`;
 
-        // Mouse Repulsion
-        const dx = p.x - mouseRef.current.x;
-        const dy = p.y - mouseRef.current.y;
+      for (let i = 0; i < drops.length; i++) {
+        const x = i * SETTINGS.FONT_SIZE;
+        const y = drops[i] * SETTINGS.FONT_SIZE;
+
+        // Check distance to mouse for a custom "glow" color
+        const dx = x - mouseRef.current.x;
+        const dy = y - mouseRef.current.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 100) {
-          p.x += dx * 0.01;
-          p.y += dy * 0.01;
+
+        if (dist < 150) {
+          ctx.fillStyle = '#34d399'; // Brighter green near mouse
+        } else {
+          ctx.fillStyle = SETTINGS.COLOR;
         }
 
-        // Draw Point
-        ctx.fillStyle = SETTINGS.NODE_COLOR;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-        ctx.fill();
+        const char = SETTINGS.CHARACTERS.charAt(
+          Math.floor(Math.random() * SETTINGS.CHARACTERS.length)
+        );
 
-        // Connect lines
-        for (let j = i + 1; j < nodes.length; j++) {
-          const p2 = nodes[j];
-          const lx = p.x - p2.x;
-          const ly = p.y - p2.y;
-          const ldist = Math.sqrt(lx * lx + ly * ly);
+        ctx.fillText(char, x, y);
 
-          if (ldist < SETTINGS.CONNECTION_DIST) {
-            ctx.strokeStyle = SETTINGS.NODE_COLOR;
-            ctx.lineWidth = 0.5;
-            ctx.globalAlpha = (1 - ldist / SETTINGS.CONNECTION_DIST) * SETTINGS.LINE_OPACITY;
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-            ctx.globalAlpha = 1;
-          }
+        // Reset drop to top randomly after it hits bottom
+        if (y > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
         }
+        drops[i]++;
       }
-      requestAnimationFrame(draw);
+    };
+
+    const interval = setInterval(draw, 50);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
     };
 
     window.addEventListener('resize', init);
-    window.addEventListener('mousemove', (e) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
-    });
-
+    window.addEventListener('mousemove', handleMouseMove);
     init();
-    draw();
 
-    return () => window.removeEventListener('resize', init);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('resize', init);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[-1] bg-[#020617]"
-      style={{ opacity: 0.6 }}
+      className="fixed inset-0 pointer-events-none z-[-1]"
+      style={{ background: SETTINGS.BG_COLOR }}
     />
   );
 };
 
-export default NeuralBackground;
+export default BinaryBackground;

@@ -1,28 +1,23 @@
 import React, { useEffect, useRef, useMemo } from "react";
 
 /**
- * PRODUCTION-GRADE PROCEDURAL LAVA LAMP
- * * CHANGES MADE:
- * 1. Fail-Safe Rendering: Added checks to prevent blank screens if dimensions aren't found.
- * 2. Full-Width Spawning: Blobs now initialize across the entire horizontal axis.
- * 3. Volumetric Gradients: Removed solid colors; used 4-stop radial gradients for depth.
- * 4. High-Performance Buffer: Physics runs on a sub-scaled canvas to keep FPS at 60.
- * 5. Anti-Clumping: Added a repulsion field when more than 3 blobs overlap.
+ * THERMODYNAMIC LAVA ENGINE (V5 - FINAL PERFORMANCE TUNED)
+ * * * FEATURES:
+ * 1. Heat-Source Physics: Blobs heat at bottom (buoyancy increases) and cool at top.
+ * 2. Size Diversity: Randomization between massive 'mother' blobs and tiny 'satellite' droplets.
+ * 3. Performance Profiling: Uses a low-res simulation buffer to minimize per-pixel filter math.
+ * 4. Advanced Goo: Multi-stop gradients with sRGB color interpolation for better depth.
  */
 
-// --- Configuration & Physics Constants ---
+interface PhysicsConfig {
+  viscosity: number;
+  heatPower: number;
+  coolRate: number;
+  friction: number;
+  spread: number;
+}
 
-const SETTINGS = {
-  SCALE: 0.4,              // Internal render resolution (0.4 = 40% of screen size)
-  BLOB_COUNT: 18,          // Total density
-  BASE_HUE: 155,           // Theme Green
-  VISCOSITY: 0.95,         // Liquid thickness (0.9 to 0.98)
-  GRAVITY: 0.02,           // Buoyancy strength
-  REPULSION: 0.8,          // How hard they bounce off each other
-  GOO_STRENGTH: 18,        // SVG Filter threshold
-};
-
-interface Blob {
+interface LavaBlob {
   id: number;
   x: number;
   y: number;
@@ -30,23 +25,27 @@ interface Blob {
   vy: number;
   radius: number;
   baseRadius: number;
+  temp: number;      // 0 (Cold) to 1 (Hot)
+  targetTemp: number;
+  noiseX: number;
+  noiseY: number;
   hue: number;
-  rotation: number;
-  rotationSpeed: number;
-  temp: number;            // 0 (Cold/Sink) to 1 (Hot/Rise)
-  tempRate: number;        // How fast it changes temperature
+  mass: number;
 }
 
 const ParticleBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number>();
-  const blobsRef = useRef<Blob[]>([]);
+  const blobsRef = useRef<LavaBlob[]>([]);
 
-  // Memoize world physics so they don't reset on every React re-render
-  const world = useMemo(() => ({
-    width: typeof window !== "undefined" ? window.innerWidth * SETTINGS.SCALE : 0,
-    height: typeof window !== "undefined" ? window.innerHeight * SETTINGS.SCALE : 0,
+  // Procedural session constants
+  const config = useMemo<PhysicsConfig>(() => ({
+    viscosity: 0.96 + Math.random() * 0.02,
+    heatPower: 0.04 + Math.random() * 0.02,
+    coolRate: 0.005,
+    friction: 0.98,
+    spread: 0.75
   }), []);
 
   useEffect(() => {
@@ -57,131 +56,138 @@ const ParticleBackground: React.FC = () => {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // --- Helper Functions ---
+    // PERFORMANCE OPTIMIZATION
+    // We run the simulation at 35% resolution. The SVG blur filter
+    // re-interpolates the edges, so it looks high-res but runs much faster.
+    const SIM_SCALE = 0.35;
+    let w = window.innerWidth * SIM_SCALE;
+    let h = window.innerHeight * SIM_SCALE;
 
-    const createBlob = (id: number, isInitial = false): Blob => {
-      const { width, height } = world;
-      // Procedural sizing: 15% to 35% of screen height
-      const baseRadius = (height * (0.15 + Math.random() * 0.25));
+    const initBlobs = () => {
+      const count = window.innerWidth < 768 ? 12 : 20;
+      const b: LavaBlob[] = [];
       
-      return {
-        id,
-        // Start across the whole screen width
-        x: Math.random() * width,
-        // If initial, scatter them. If new, start at bottom.
-        y: isInitial ? Math.random() * height : height + baseRadius,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
-        radius: baseRadius,
-        baseRadius: baseRadius,
-        hue: SETTINGS.BASE_HUE + (Math.random() * 20 - 10),
-        rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.02,
-        temp: Math.random(),
-        tempRate: 0.002 + Math.random() * 0.005
-      };
-    };
+      for (let i = 0; i < count; i++) {
+        // High randomization in sizes
+        const sizeVariance = Math.random();
+        let baseR;
+        
+        if (sizeVariance > 0.85) {
+          baseR = (h * 0.18) + (Math.random() * h * 0.1); // Huge blobs
+        } else if (sizeVariance > 0.4) {
+          baseR = (h * 0.08) + (Math.random() * h * 0.08); // Medium blobs
+        } else {
+          baseR = (h * 0.03) + (Math.random() * h * 0.04); // Tiny satellite droplets
+        }
 
-    const setup = () => {
-      const w = window.innerWidth * SETTINGS.SCALE;
-      const h = window.innerHeight * SETTINGS.SCALE;
-      world.width = w;
-      world.height = h;
-      canvas.width = w;
-      canvas.height = h;
-
-      const initialBlobs: Blob[] = [];
-      for (let i = 0; i < SETTINGS.BLOB_COUNT; i++) {
-        initialBlobs.push(createBlob(i, true));
+        b.push({
+          id: i,
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          baseRadius: baseR,
+          radius: baseR,
+          temp: Math.random(),
+          targetTemp: 0,
+          noiseX: Math.random() * 100,
+          noiseY: Math.random() * 100,
+          hue: 155 + (Math.random() * 25 - 12), // Variants of your site green
+          mass: baseR * baseR
+        });
       }
-      blobsRef.current = initialBlobs;
+      blobsRef.current = b;
     };
 
-    // --- Physics Engine ---
-
-    const update = (time: number) => {
+    const updatePhysics = (time: number) => {
       const blobs = blobsRef.current;
-      const { width, height } = world;
+      const dt = 1.0; // Delta time normalization
 
       for (let i = 0; i < blobs.length; i++) {
         const b = blobs[i];
 
-        // 1. Thermal Buoyancy Logic
-        // Wax heats at bottom, cools at top
-        if (b.y > height * 0.8) b.temp += b.tempRate;
-        else if (b.y < height * 0.2) b.temp -= b.tempRate;
-        b.temp = Math.max(0, Math.min(1, b.temp));
+        // 1. THERMODYNAMICS (LAVA LAMP MOVEMENT)
+        // Blobs gain heat at the bottom (h) and lose it at the top (0)
+        const heatZone = h * 0.85;
+        const coolZone = h * 0.15;
 
-        // Apply lift based on temp
-        const lift = (b.temp - 0.5) * SETTINGS.GRAVITY * 15;
-        b.vy -= lift;
+        if (b.y > heatZone) {
+          b.temp += 0.015 * dt;
+        } else if (b.y < coolZone) {
+          b.temp -= 0.01 * dt;
+        }
+        b.temp = Math.max(0, Math.min(1.2, b.temp));
 
-        // 2. Horizontal Drift (Convection)
-        b.vx += Math.sin(time * 0.001 + b.id) * 0.05;
+        // 2. APPLY FORCES
+        // Buoyancy force (rising/sinking)
+        const buoyancy = (b.temp - 0.5) * config.heatPower;
+        b.vy -= buoyancy * dt;
 
-        // 3. Collision / Repulsion (Prevents the "Clump Ball")
+        // Sideways drift (Convection)
+        b.vx += Math.sin(time * 0.001 + b.noiseX) * 0.05;
+
+        // 3. INTER-BLOB INTERACTION (Anti-Clumping)
         for (let j = i + 1; j < blobs.length; j++) {
-          const b2 = blobs[j];
-          const dx = b2.x - b.x;
-          const dy = b2.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const minDist = (b.radius + b2.radius) * SETTINGS.REPULSION;
+          const other = blobs[j];
+          const dx = other.x - b.x;
+          const dy = other.y - b.y;
+          const distSq = dx * dx + dy * dy;
+          const dist = Math.sqrt(distSq);
+          const minD = (b.radius + other.radius) * config.spread;
 
-          if (dist < minDist) {
-            const force = (minDist - dist) * 0.001;
-            const angle = Math.atan2(dy, dx);
-            const fx = Math.cos(angle) * force;
-            const fy = Math.sin(angle) * force;
+          if (dist < minD) {
+            // Surface tension attraction vs volumetric repulsion
+            const force = (dist - minD) * 0.0005;
+            const fx = (dx / dist) * force;
+            const fy = (dy / dist) * force;
 
-            b.vx -= fx;
-            b.vy -= fy;
-            b2.vx += fx;
-            b2.vy += fy;
+            b.vx += fx;
+            b.vy += fy;
+            other.vx -= fx;
+            other.vy -= fy;
           }
         }
 
-        // 4. Integrate Movement
-        b.vx *= SETTINGS.VISCOSITY;
-        b.vy *= SETTINGS.VISCOSITY;
+        // 4. INTEGRATION
+        b.vx *= config.viscosity;
+        b.vy *= config.viscosity;
         b.x += b.vx;
         b.y += b.vy;
-        b.rotation += b.rotationSpeed;
 
-        // 5. Boundary Wrapping
-        const buffer = b.radius * 2;
-        if (b.x < -buffer) b.x = width + buffer;
-        if (b.x > width + buffer) b.x = -buffer;
-        if (b.y < -buffer) b.y = height + buffer;
-        if (b.y > height + buffer) b.y = -buffer;
+        // 5. SOFT BOUNDARIES
+        const pad = b.radius * 1.5;
+        if (b.x < -pad) b.x = w + pad;
+        if (b.x > w + pad) b.x = -pad;
+        if (b.y < -pad) b.y = h + pad;
+        if (b.y > h + pad) b.y = -pad;
 
-        // 6. Organic Pulsing
-        b.radius = b.baseRadius * (1 + Math.sin(time * 0.002 + b.id) * 0.1);
+        // 6. ORGANIC PULSING
+        b.radius = b.baseRadius * (1 + Math.sin(time * 0.002 + b.noiseY) * 0.05);
       }
     };
 
-    // --- Rendering Pass ---
+    const draw = (time: number) => {
+      ctx.clearRect(0, 0, w, h);
+      const blobs = blobsRef.current;
 
-    const render = (time: number) => {
-      ctx.clearRect(0, 0, world.width, world.height);
-
-      blobsRef.current.forEach((b) => {
-        // Create shadowy, multi-stop gradient for depth
-        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius);
+      blobs.forEach(b => {
+        // Multi-stop radial gradient for the "Shadowy" look
+        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius * 1.4);
         
-        const h = b.hue;
+        const hVal = b.hue;
         const s = 100;
         
-        // Stops for a 3D shadowy look
-        grad.addColorStop(0, `hsla(${h + 15}, ${s}%, 70%, 0.9)`);   // Hot core
-        grad.addColorStop(0.4, `hsla(${h}, ${s}%, 45%, 0.8)`);      // Main body
-        grad.addColorStop(0.7, `hsla(${h - 10}, ${s}%, 20%, 0.6)`); // Edge shadow
-        grad.addColorStop(1, `hsla(${h - 20}, ${s}%, 10%, 0)`);    // Transparent falloff
+        // Shadow and Light stops
+        grad.addColorStop(0, `hsla(${hVal + 10}, ${s}%, 70%, 0.9)`); // Glow core
+        grad.addColorStop(0.3, `hsla(${hVal}, ${s}%, 45%, 0.7)`);    // Mid color
+        grad.addColorStop(0.7, `hsla(${hVal - 20}, ${s}%, 20%, 0.4)`); // Shadow edge
+        grad.addColorStop(1, `hsla(${hVal - 20}, ${s}%, 10%, 0)`);    // Fade out
 
         ctx.fillStyle = grad;
         ctx.beginPath();
         
-        // Use ellipse for motion stretching
-        const stretch = Math.min(Math.abs(b.vy) * 0.2, 0.5);
+        // Stretch based on vertical velocity (Gooey effect)
+        const stretch = Math.min(Math.abs(b.vy) * 0.15, 0.4);
         ctx.ellipse(
           b.x, b.y, 
           b.radius * (1 - stretch), 
@@ -192,49 +198,44 @@ const ParticleBackground: React.FC = () => {
         ctx.fill();
       });
 
-      update(time);
-      requestRef.current = requestAnimationFrame(render);
+      updatePhysics(time);
+      requestRef.current = requestAnimationFrame(draw);
     };
 
-    // Start
-    setup();
-    requestRef.current = requestAnimationFrame(render);
-
     const handleResize = () => {
-      const w = window.innerWidth * SETTINGS.SCALE;
-      const h = window.innerHeight * SETTINGS.SCALE;
-      world.width = w;
-      world.height = h;
+      w = window.innerWidth * SIM_SCALE;
+      h = window.innerHeight * SIM_SCALE;
       canvas.width = w;
       canvas.height = h;
     };
 
     window.addEventListener("resize", handleResize);
+    handleResize();
+    initBlobs();
+    requestRef.current = requestAnimationFrame(draw);
 
     return () => {
       window.removeEventListener("resize", handleResize);
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [world]);
+  }, [config]);
 
   return (
-    <div ref={containerRef} className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
-      {/* IMPORTANT: SVG is placed inside the container but hidden. 
-          The 'color-interpolation-filters' ensures it looks the same on all browsers.
-      */}
-      <svg className="absolute w-0 h-0 invisible" aria-hidden="true">
+    <div ref={containerRef} className="fixed inset-0 pointer-events-none z-[-1] bg-[#020617]">
+      <svg className="absolute w-0 h-0" aria-hidden="true">
         <defs>
-          <filter id="lava-goo-master" colorInterpolationFilters="sRGB">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+          <filter id="ultimate-lava-goo" colorInterpolationFilters="sRGB">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
             <feColorMatrix
               in="blur"
               mode="matrix"
-              values={`1 0 0 0 0  
-                       0 1 0 0 0  
-                       0 0 1 0 0  
-                       0 0 0 ${SETTINGS.GOO_STRENGTH} -9`}
+              values="1 0 0 0 0  
+                      0 1 0 0 0  
+                      0 0 1 0 0  
+                      0 0 0 22 -11"
               result="goo"
             />
+            {/* Blends the sharp goo with the original soft glow cores */}
             <feComposite in="SourceGraphic" in2="goo" operator="atop" />
           </filter>
         </defs>
@@ -244,10 +245,10 @@ const ParticleBackground: React.FC = () => {
         ref={canvasRef}
         className="w-full h-full block"
         style={{
-          filter: "url(#lava-goo-master)",
+          filter: "url(#ultimate-lava-goo)",
           opacity: 0.5,
           mixBlendMode: "screen",
-          transform: "scale(1.05)", // Slight overscale to hide edge artifacts
+          transform: "scale(1.1)", // Hides edges
         }}
       />
     </div>

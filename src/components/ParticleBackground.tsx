@@ -1,21 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * SHATTERED PRISM BACKGROUND
- * - Aesthetic: 3D floating shards / geometric depth.
- * - Performance: Ultra-optimized (No physics, just trigonometry).
- * - Interaction: Shards "tilt" toward the mouse.
+ * LIQUID BOKEH MESH
+ * - Aesthetic: Ultra-minimalist blurred light orbs.
+ * - Performance: 10/10 (Only 6 objects, GPU-blurred).
+ * - Interaction: Orbs gravitate toward mouse with smooth easing.
  */
 
 const SETTINGS = {
-  SHARD_COUNT: 35,
-  MAX_SIZE: 40,
-  MIN_SIZE: 15,
-  COLOR: '#10b981', // Your Emerald Green
+  ORB_COUNT: 6,
+  COLOR_PALETTE: ['#10b981', '#059669', '#34d399', '#064e3b'], // Emerald shades
   BG: '#020617',
 };
 
-const PrismBackground: React.FC = () => {
+const BokehBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
 
@@ -26,22 +24,21 @@ const PrismBackground: React.FC = () => {
     if (!ctx) return;
 
     let w: number, h: number;
-    let shards: any[] = [];
+    let orbs: any[] = [];
 
     const init = () => {
       w = canvas.width = window.innerWidth;
       h = canvas.height = window.innerHeight;
-      shards = [];
-      for (let i = 0; i < SETTINGS.SHARD_COUNT; i++) {
-        shards.push({
+      orbs = [];
+      for (let i = 0; i < SETTINGS.ORB_COUNT; i++) {
+        orbs.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          size: Math.random() * (SETTINGS.MAX_SIZE - SETTINGS.MIN_SIZE) + SETTINGS.MIN_SIZE,
-          speed: 0.2 + Math.random() * 0.5,
-          angle: Math.random() * Math.PI * 2,
-          rotSpeed: (Math.random() - 0.5) * 0.01,
-          sides: Math.floor(Math.random() * 3) + 3, // Randomly Triangles, Squares, or Pentagons
-          opacity: 0.1 + Math.random() * 0.3
+          targetX: Math.random() * w,
+          targetY: Math.random() * h,
+          radius: Math.random() * (w * 0.3) + w * 0.2, // Huge soft orbs
+          color: SETTINGS.COLOR_PALETTE[i % SETTINGS.COLOR_PALETTE.length],
+          speed: 0.005 + Math.random() * 0.01
         });
       }
     };
@@ -50,51 +47,33 @@ const PrismBackground: React.FC = () => {
       ctx.fillStyle = SETTINGS.BG;
       ctx.fillRect(0, 0, w, h);
 
-      shards.forEach(s => {
-        // Subtle drift
-        s.y -= s.speed;
-        s.angle += s.rotSpeed;
+      orbs.forEach(orb => {
+        // Smoothly move toward a target
+        orb.x += (orb.targetX - orb.x) * orb.speed;
+        orb.y += (orb.targetY - orb.y) * orb.speed;
 
-        // Mouse "Tilt" calculation
-        const dx = mouseRef.current.x - s.x;
-        const dy = mouseRef.current.y - s.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const tiltX = (dx / w) * 20;
-        const tiltY = (dy / h) * 20;
+        // Mouse influence: subtly pull targets toward mouse
+        const dx = mouseRef.current.x - orb.x;
+        const dy = mouseRef.current.y - orb.y;
+        orb.targetX += dx * 0.001;
+        orb.targetY += dy * 0.001;
 
-        // Reset if goes off screen
-        if (s.y < -50) {
-          s.y = h + 50;
-          s.x = Math.random() * w;
+        // If orb reaches target, pick a new random target
+        if (Math.abs(orb.x - orb.targetX) < 10) {
+          orb.targetX = Math.random() * w;
+          orb.targetY = Math.random() * h;
         }
 
-        ctx.save();
-        ctx.translate(s.x + tiltX, s.y + tiltY);
-        ctx.rotate(s.angle);
-        
-        // Draw the polygon
-        ctx.beginPath();
-        ctx.strokeStyle = SETTINGS.COLOR;
-        ctx.globalAlpha = s.opacity;
-        ctx.lineWidth = 1;
+        // Draw the soft orb
+        const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
+        gradient.addColorStop(0, orb.color);
+        gradient.addColorStop(1, 'transparent');
 
-        for (let i = 0; i < s.sides; i++) {
-          const x = s.size * Math.cos((i * 2 * Math.PI) / s.sides);
-          const y = s.size * Math.sin((i * 2 * Math.PI) / s.sides);
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        
-        ctx.closePath();
-        ctx.stroke();
-
-        // Add a subtle "shimmer" dot in the center
+        ctx.globalAlpha = 0.4;
+        ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(0, 0, 1, 0, Math.PI * 2);
-        ctx.fillStyle = SETTINGS.COLOR;
+        ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
         ctx.fill();
-        
-        ctx.restore();
       });
 
       requestAnimationFrame(draw);
@@ -116,11 +95,20 @@ const PrismBackground: React.FC = () => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[-1]"
-    />
+    <div className="fixed inset-0 z-[-1] overflow-hidden bg-[#020617]">
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full"
+      />
+      {/* This layer is the "Glass" that makes it look cool */}
+      <div 
+        className="absolute inset-0 backdrop-blur-[100px] pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at center, transparent 0%, rgba(2, 6, 23, 0.4) 100%)'
+        }}
+      />
+    </div>
   );
 };
 
-export default PrismBackground;
+export default BokehBackground;

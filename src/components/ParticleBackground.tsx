@@ -1,232 +1,276 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Optimized Sharp Lava Lamp Background
- * - Procedurally generated physics (unique per visitor)
- * - Solid blobs (no blur filter) using gradient stops
- * - Performance optimized: no heavy CSS filters
+ * Advanced Gooey Lava Lamp Background
+ * * CORE FEATURES:
+ * - SVG Alpha-Thresholding: The gold standard for web "goo". It blurs the 
+ * shapes and crunches the alpha channel so they physically merge like liquid.
+ * - N-Body Physics: Blobs calculate distance to each other. They attract to simulate
+ * surface tension, and repel to preserve volume.
+ * - Brownian Motion & Chaos: Complex sine wave interference makes paths unpredictable.
+ * - Mass & Velocity Variance: Big blobs move slow and have high inertia; small 
+ * droplets zip around erratically.
  */
 
 interface Blob {
+  id: number;
   x: number;
   y: number;
   vx: number;
   vy: number;
-  r: number;
-  baseR: number;
-  pulse: number;
-  pulseTimer: number;
-  hue: number;
-  targetHue: number;
-  temp: number;
-  tempDir: 1 | -1;
-  phase: number;
-  shedTimer: number;
-  alive: boolean;
-  viscosity: number; // Unique per-blob movement factor
+  baseR: number;       // The resting radius
+  r: number;           // The current radius (pulses over time)
+  mass: number;        // Affects momentum and collision pushback
+  phaseX: number;      // Seed for random horizontal wandering
+  phaseY: number;      // Seed for random vertical wandering
+  wanderSpeed: number; // How fast this specific blob changes direction
+  temperature: number; // Drives vertical buoyancy
+  isDroplet: boolean;  // Small fast blobs behave slightly differently
 }
-
-const BASE_HUE = 152;
-const HOT_HUE = 162;
-const HOVER_HUE = 168;
 
 const ParticleBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const blobsRef = useRef<Blob[]>([]);
   const animRef = useRef<number>(0);
-  const visibleRef = useRef(true);
   const mouseRef = useRef({ x: -9999, y: -9999, active: false });
-  
-  // Procedural world constants (unique per session)
-  const worldRef = useRef({
-    gravity: 0.04 + Math.random() * 0.04,
-    wobbleSpeed: 0.3 + Math.random() * 0.4,
-    viscosity: 0.92 + Math.random() * 0.05
-  });
+  const blobsRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    const nav = navigator as Navigator & { deviceMemory?: number };
-    const lowEnd = (nav.hardwareConcurrency && nav.hardwareConcurrency <= 4) || (nav.deviceMemory && nav.deviceMemory <= 4);
-
-    // Using higher resolution since we removed the expensive blur filter
-    const SCALE = window.devicePixelRatio || 1;
-
+    // We scale down the internal canvas resolution slightly because the SVG 
+    // Goo filter is computationally heavy. This keeps the frame rate buttery.
+    const pixelRatio = window.devicePixelRatio > 1 ? 1 : 0.75;
+    
     let w = 0;
     let h = 0;
 
-    const makeBlob = (opts?: Partial<Blob>): Blob => {
-      const baseR = opts?.baseR ?? (Math.random() * 0.06 + 0.07) * Math.min(window.innerWidth, window.innerHeight);
-      return {
-        x: opts?.x ?? Math.random() * w,
-        y: opts?.y ?? Math.random() * h,
-        vx: opts?.vx ?? (Math.random() - 0.5) * 0.5,
-        vy: opts?.vy ?? (Math.random() - 0.5) * 0.5,
-        r: baseR,
-        baseR,
-        pulse: 0,
-        pulseTimer: 2 + Math.random() * 6,
-        hue: BASE_HUE + Math.random() * 4,
-        targetHue: BASE_HUE,
-        temp: Math.random(),
-        tempDir: Math.random() < 0.5 ? 1 : -1,
-        phase: Math.random() * Math.PI * 2,
-        shedTimer: 10 + Math.random() * 15,
-        alive: true,
-        viscosity: 0.94 + Math.random() * 0.04, // Procedural drag
-      };
+    // --- PHYSICS CONSTANTS ---
+    const ATTRACTION_DIST_MULTIPLIER = 2.2; // How far away they start pulling each other
+    const REPULSION_DIST_MULTIPLIER = 0.8;  // How close before they violently push away
+    const SURFACE_TENSION = 0.0008;         // Strength of the merge pull
+    const VISCOSITY = 0.94;                 // Friction (lower = more sliding, higher = stopping)
+    const BASE_HUE = 155;                   // The theme's green
+
+    const initBlobs = () => {
+      const isMobile = window.innerWidth < 768;
+      const count = isMobile ? 12 : 20;
+      const newBlobs: Blob[] = [];
+
+      for (let i = 0; i < count; i++) {
+        // Generate a mix of large main globs and tiny droplets
+        const isDroplet = Math.random() > 0.6;
+        
+        // Base radius relative to screen size
+        const minSize = isMobile ? 20 : 30;
+        const maxSize = isMobile ? 80 : 140;
+        const radius = isDroplet 
+          ? minSize + Math.random() * 20 
+          : minSize + 40 + Math.random() * (maxSize - minSize);
+
+        newBlobs.push({
+          id: i,
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          baseR: radius,
+          r: radius,
+          mass: radius * radius, // Area = mass
+          phaseX: Math.random() * Math.PI * 2,
+          phaseY: Math.random() * Math.PI * 2,
+          wanderSpeed: (isDroplet ? 1.5 : 0.5) + Math.random(),
+          temperature: Math.random(),
+          isDroplet,
+        });
+      }
+      blobsRef.current = newBlobs;
     };
 
     const resize = () => {
       const cssW = window.innerWidth;
       const cssH = window.innerHeight;
-      w = cssW * SCALE;
-      h = cssH * SCALE;
+      w = cssW * pixelRatio;
+      h = cssH * pixelRatio;
+      
       canvas.width = w;
       canvas.height = h;
       canvas.style.width = `${cssW}px`;
       canvas.style.height = `${cssH}px`;
-
-      const count = lowEnd ? 5 : cssW < 768 ? 6 : 9;
-      blobsRef.current = Array.from({ length: count }, () => makeBlob());
+      
+      if (blobsRef.current.length === 0) {
+        initBlobs();
+      }
     };
-    
+
     resize();
     window.addEventListener("resize", resize, { passive: true });
 
-    const onPointer = (e: PointerEvent) => {
-      mouseRef.current.x = e.clientX * SCALE;
-      mouseRef.current.y = e.clientY * SCALE;
+    const onPointerMove = (e: PointerEvent) => {
+      mouseRef.current.x = e.clientX * pixelRatio;
+      mouseRef.current.y = e.clientY * pixelRatio;
       mouseRef.current.active = true;
     };
-    
-    window.addEventListener("pointermove", onPointer, { passive: true });
-    window.addEventListener("pointerleave", () => { mouseRef.current.active = false; });
-
-    const drawBlob = (b: Blob) => {
-      // Instead of Global Blur, we use a sharp-step radial gradient for solid look
-      const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-      grad.addColorStop(0, `hsla(${b.hue}, 100%, 60%, 0.8)`);
-      grad.addColorStop(0.85, `hsla(${b.hue}, 100%, 45%, 0.6)`);
-      grad.addColorStop(0.98, `hsla(${b.hue}, 100%, 40%, 0.1)`);
-      grad.addColorStop(1, `hsla(${b.hue}, 100%, 40%, 0)`);
-      
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      // Use a slightly oval shape based on velocity for "gooey" stretching
-      const stretch = Math.min(Math.abs(b.vy) * 0.1, 0.2);
-      ctx.ellipse(b.x, b.y, b.r * (1 - stretch), b.r * (1 + stretch), 0, 0, Math.PI * 2);
-      ctx.fill();
+    const onPointerLeave = () => {
+      mouseRef.current.active = false;
     };
 
-    const drawFrame = (timeSec: number, dtSec: number) => {
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerleave", onPointerLeave, { passive: true });
+
+    // --- MAIN ANIMATION LOOP ---
+    const render = (time: number) => {
+      const timeSec = time * 0.001;
+      
+      // Clear with absolute transparency so the SVG filter works cleanly
       ctx.clearRect(0, 0, w, h);
       
       const blobs = blobsRef.current;
       const m = mouseRef.current;
-      const world = worldRef.current;
-      const mouseInfluence = 200 * SCALE;
 
-      for (let i = blobs.length - 1; i >= 0; i--) {
-        const b = blobs[i];
-        
-        // Buoyancy Logic
-        b.temp += b.tempDir * 0.05 * dtSec;
-        if (b.temp > 1) { b.temp = 1; b.tempDir = -1; }
-        else if (b.temp < 0) { b.temp = 0; b.tempDir = 1; }
+      // 1. APPLY FORCES & INTERACTION
+      for (let i = 0; i < blobs.length; i++) {
+        const a = blobs[i];
 
-        const buoyancy = (b.temp - 0.5) * -world.gravity;
-        b.vy += buoyancy;
+        // Brownian Motion (Unpredictable wandering via noise/sine waves)
+        // Droplets move faster and more erratically
+        const driftForce = a.isDroplet ? 0.15 : 0.05;
+        a.vx += Math.sin(timeSec * a.wanderSpeed + a.phaseX) * driftForce;
+        a.vy += Math.cos(timeSec * (a.wanderSpeed * 0.8) + a.phaseY) * driftForce;
 
-        // Convection Wobble
-        b.vx += Math.sin(timeSec * world.wobbleSpeed + b.phase) * 0.01;
+        // Thermal Buoyancy (Hot rises, cold sinks gently)
+        a.temperature += Math.sin(timeSec * 0.2 + a.id) * 0.01;
+        const buoyancy = (a.temperature - 0.5) * 0.08;
+        a.vy -= buoyancy;
 
-        // Friction / Viscosity
-        b.vx *= b.viscosity;
-        b.vy *= b.viscosity;
+        // Blob-to-Blob Interaction (The Goo Mechanics)
+        for (let j = i + 1; j < blobs.length; j++) {
+          const b = blobs[j];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const distSq = dx * dx + dy * dy;
+          const dist = Math.sqrt(distSq);
+          const combinedRadius = a.r + b.r;
 
-        b.x += b.vx * (dtSec * 60);
-        b.y += b.vy * (dtSec * 60);
+          if (dist < combinedRadius * ATTRACTION_DIST_MULTIPLIER) {
+            // They are close enough to feel each other
+            const forceMag = (dist - combinedRadius * REPULSION_DIST_MULTIPLIER) * SURFACE_TENSION;
+            
+            const fx = (dx / dist) * forceMag;
+            const fy = (dy / dist) * forceMag;
 
-        // Soft Wall Bounce
-        if (b.y < b.r) {
-          b.vy += 0.05;
-          b.tempDir = -1;
-        } else if (b.y > h - b.r) {
-          b.vy -= 0.05;
-          b.tempDir = 1;
-        }
-
-        // Horizontal Wrap
-        const wrapPad = b.r * 2;
-        if (b.x < -wrapPad) b.x = w + wrapPad;
-        else if (b.x > w + wrapPad) b.x = -wrapPad;
-
-        // Hover Response
-        let hueTarget = BASE_HUE + (HOT_HUE - BASE_HUE) * b.temp;
-        if (m.active) {
-          const dx = b.x - m.x;
-          const dy = b.y - m.y;
-          const d2 = dx * dx + dy * dy;
-          if (d2 < mouseInfluence * mouseInfluence) {
-            const k = 1 - Math.sqrt(d2) / mouseInfluence;
-            hueTarget = hueTarget + (HOVER_HUE - hueTarget) * k;
-            // Subtle "attraction" to mouse for gooey feel
-            b.vx -= dx * 0.0001;
-            b.vy -= dy * 0.0001;
+            // Apply force inversely proportional to mass (heavy things move less)
+            a.vx += fx * (b.mass / (a.mass + b.mass));
+            a.vy += fy * (b.mass / (a.mass + b.mass));
+            b.vx -= fx * (a.mass / (a.mass + b.mass));
+            b.vy -= fy * (a.mass / (a.mass + b.mass));
           }
         }
-        
-        b.hue += (hueTarget - b.hue) * 0.1;
-        
-        // Pulse Logic
-        b.pulseTimer -= dtSec;
-        if (b.pulseTimer <= 0) {
-          b.pulse = 1;
-          b.pulseTimer = 5 + Math.random() * 10;
+
+        // Mouse Interaction (Gently pushes the goo away like a magnetic field)
+        if (m.active) {
+          const dx = a.x - m.x;
+          const dy = a.y - m.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const influenceRadius = 250 * pixelRatio;
+          
+          if (dist < influenceRadius) {
+            const force = (influenceRadius - dist) * 0.0005;
+            a.vx += (dx / dist) * force;
+            a.vy += (dy / dist) * force;
+          }
         }
-        b.pulse *= 0.96;
-        b.r = b.baseR * (1 + b.pulse * 0.15 + Math.sin(timeSec + b.phase) * 0.03);
 
-        drawBlob(b);
+        // Breathing effect (Radius pulses slightly over time)
+        a.r = a.baseR * (1 + Math.sin(timeSec * 2 + a.phaseX) * 0.1);
+
+        // Apply Velocity & Viscosity
+        a.vx *= VISCOSITY;
+        a.vy *= VISCOSITY;
+        a.x += a.vx;
+        a.y += a.vy;
+
+        // Boundaries (Soft bouncing against screen edges)
+        const margin = a.r;
+        if (a.x < -margin) { a.x = -margin; a.vx *= -1; }
+        if (a.x > w + margin) { a.x = w + margin; a.vx *= -1; }
+        if (a.y < -margin) { a.y = h + margin; a.y = -margin; a.vy *= -1; } // Wrapping from top
+        if (a.y > h + margin) { a.y = -margin; a.vy *= 0.5; } // Dropping off bottom wraps to top
       }
+
+      // 2. DRAWING
+      // We draw solid, bright circles. The SVG filter handles turning this into "goo".
+      ctx.fillStyle = `hsl(${BASE_HUE}, 100%, 45%)`;
+      ctx.beginPath();
+      
+      for (let i = 0; i < blobs.length; i++) {
+        const a = blobs[i];
+        // Draw the main circle
+        ctx.moveTo(a.x, a.y);
+        ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      animRef.current = requestAnimationFrame(render);
     };
 
-    if (reduceMotion) {
-      drawFrame(0, 0);
-      return;
-    }
-
-    const animate = (t: number) => {
-      const dtSec = 0.016; // Stable step for physics
-      drawFrame(t * 0.001, dtSec);
-      animRef.current = requestAnimationFrame(animate);
-    };
-    animRef.current = requestAnimationFrame(animate);
+    animRef.current = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerleave", onPointerLeave);
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden="true"
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{
-        opacity: 0.6,
-        mixBlendMode: "screen",
-      }}
-    />
+    <>
+      {/* THE SECRET SAUCE: The SVG Goo Filter.
+        This blurs the sharp canvas circles, and the feColorMatrix aggressively clamps 
+        the alpha channel. This creates the "surface tension" where circles snap together.
+      */}
+      <svg style={{ display: "none" }} aria-hidden="true">
+        <defs>
+          <filter id="goo">
+            {/* Blur the incoming graphics */}
+            <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur" />
+            {/* Crunch the alpha channel. 
+              The matrix multiplies alpha by 30, and subtracts 15. 
+              This makes fuzzy edges completely transparent, and centers completely solid.
+            */}
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="
+                1 0 0 0 0  
+                0 1 0 0 0  
+                0 0 1 0 0  
+                0 0 0 30 -15"
+              result="goo"
+            />
+            {/* Draw the original color back over the morphed geometry */}
+            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+          </filter>
+        </defs>
+      </svg>
+
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          // Apply the SVG filter to the entire canvas element
+          filter: "url(#goo)",
+          opacity: 0.25, // Lower opacity so it acts like a background aura
+          mixBlendMode: "screen", // Makes the green pop dynamically against dark backgrounds
+        }}
+      />
+    </>
   );
 };
 

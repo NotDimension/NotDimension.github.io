@@ -50,7 +50,7 @@
 }
 
 /* =========================================================
-   HERO BACKGROUND (Blur Removed)
+   HERO BACKGROUND - SHARP VERSION
    ========================================================= */
 .hero-bg {
   position: relative;
@@ -67,22 +67,23 @@
   background-position: center;
   background-repeat: no-repeat;
   z-index: -2;
-  /* Ensure no filter is applied here */
-  filter: none; 
+  /* Blur explicitly disabled */
+  filter: none !important; 
+  /* Removing will-change prevents browser "softening" during animation */
   animation: heroDrift 30s ease-in-out infinite alternate;
-  will-change: transform;
 }
 
 .hero-bg::after {
   content: '';
   position: absolute;
   inset: 0;
+  /* Lightened the dark overlay to reveal background sharpness */
   background:
-    radial-gradient(ellipse at 50% 35%, hsl(155 100% 45% / 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 35%, hsl(155 100% 45% / 0.08) 0%, transparent 55%),
     linear-gradient(
       to bottom,
-      hsl(155 45% 3% / 0.55) 0%,
-      hsl(155 45% 3% / 0.7) 55%,
+      hsl(155 45% 3% / 0.25) 0%, 
+      hsl(155 45% 3% / 0.4) 55%,
       hsl(var(--background)) 100%
     );
   z-index: -1;
@@ -90,8 +91,9 @@
 }
 
 @keyframes heroDrift {
-  0%   { transform: scale(1.05) translate(0, 0); }
-  100% { transform: scale(1.1) translate(-1.5%, -1%); }
+  /* Scale reduced to minimize pixel stretching */
+  0%   { transform: scale(1.02) translate(0, 0); }
+  100% { transform: scale(1.05) translate(-1%, -0.5%); }
 }
 
 /* =========================================================

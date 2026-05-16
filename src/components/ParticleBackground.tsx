@@ -1,36 +1,83 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 /**
- * STATIC CSS GRADIENT BACKGROUND
- * - Zero JS, zero canvas, zero rAF.
- * - Pure CSS radial gradients with a subtle slow drift animation.
- * - Respects prefers-reduced-motion (animation auto-disabled).
+ * CSS GRADIENT BACKGROUND + CURSOR SPOTLIGHT
+ * - Zero canvas. Pure CSS radial gradients.
+ * - One rAF-throttled pointermove updates two CSS vars for an interactive glow.
+ * - Reduced blur for crisper visuals and lower GPU cost.
+ * - Disabled on touch / reduced motion.
  */
 const Background: React.FC = () => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(hover: none)').matches) return;
+
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+    let tx = x;
+    let ty = y;
+    let raf = 0;
+    let running = false;
+
+    const tick = () => {
+      // ease toward target
+      x += (tx - x) * 0.08;
+      y += (ty - y) * 0.08;
+      el.style.setProperty('--mx', `${x}px`);
+      el.style.setProperty('--my', `${y}px`);
+      if (Math.abs(tx - x) > 0.5 || Math.abs(ty - y) > 0.5) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        running = false;
+      }
+    };
+
+    const onMove = (e: PointerEvent) => {
+      tx = e.clientX;
+      ty = e.clientY;
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(tick);
+      }
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: true });
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <div
+      ref={ref}
       aria-hidden="true"
-      className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none"
-      style={{ backgroundColor: '#020617' }}
+      className="bg-root fixed inset-0 z-[-1] overflow-hidden pointer-events-none"
     >
-      <div className="bg-gradients absolute inset-0" />
       <style>{`
-        .bg-gradients {
-          background:
-            radial-gradient(60vmax 60vmax at 20% 30%, rgba(16,185,129,0.18), transparent 60%),
-            radial-gradient(55vmax 55vmax at 80% 70%, rgba(5,150,105,0.16), transparent 60%),
-            radial-gradient(45vmax 45vmax at 50% 90%, rgba(52,211,153,0.12), transparent 60%),
-            radial-gradient(40vmax 40vmax at 90% 10%, rgba(6,78,59,0.25), transparent 60%);
-          filter: blur(40px);
-          will-change: transform;
-          animation: bgDrift 40s ease-in-out infinite alternate;
+        .bg-root {
+          --mx: 50vw;
+          --my: 50vh;
+          background-color: #020617;
+          background-image:
+            radial-gradient(420px circle at var(--mx) var(--my), rgba(52,211,153,0.22), transparent 65%),
+            radial-gradient(50vmax 50vmax at 20% 30%, rgba(16,185,129,0.16), transparent 60%),
+            radial-gradient(45vmax 45vmax at 80% 70%, rgba(5,150,105,0.14), transparent 60%),
+            radial-gradient(35vmax 35vmax at 50% 95%, rgba(6,78,59,0.20), transparent 60%);
+          filter: blur(12px);
+          will-change: background-position;
+          animation: bgDrift 50s ease-in-out infinite alternate;
         }
         @keyframes bgDrift {
-          0%   { transform: translate3d(0,0,0) scale(1); }
-          100% { transform: translate3d(-2%, 1%, 0) scale(1.05); }
+          0%   { background-position: 0 0, 0 0, 0 0, 0 0; }
+          100% { background-position: 0 0, -3% 2%, 2% -2%, -1% -3%; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .bg-gradients { animation: none; }
+          .bg-root { animation: none; }
         }
       `}</style>
     </div>

@@ -48,15 +48,15 @@ const HeroSection = () => {
             className="relative cursor-pointer group"
             style={{ willChange: "transform" }}
           >
-            {/* Static glow halo */}
+            {/* Soft gray halo */}
             <div
-              className="absolute -inset-6 rounded-full bg-accent/15 blur-2xl pointer-events-none transition-opacity duration-500 group-hover:opacity-150"
+              className="absolute -inset-6 rounded-full bg-foreground/5 blur-2xl pointer-events-none transition-opacity duration-500 group-hover:opacity-100"
               style={{ willChange: "opacity", transform: "translateZ(0)" }}
             />
 
-            {/* Image container */}
+            {/* Image container with GREEN ring */}
             <div
-              className="relative w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-2 border-accent/30 shadow-[0_0_40px_rgba(16,185,129,0.18)] transition-[border-color,box-shadow] duration-500 group-hover:border-accent/70 group-hover:shadow-[0_0_60px_rgba(16,185,129,0.35)]"
+              className="relative w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-[3px] border-emerald-500/80 shadow-[0_0_40px_rgba(16,185,129,0.25)] transition-[border-color,box-shadow] duration-500 group-hover:border-emerald-400 group-hover:shadow-[0_0_60px_rgba(16,185,129,0.45)]"
               style={{ transform: "translateZ(0)" }}
             >
               <img
@@ -64,19 +64,20 @@ const HeroSection = () => {
                 alt="NotDimension"
                 loading="eager"
                 decoding="async"
+                fetchPriority="high"
                 className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
                 style={{ willChange: "transform" }}
               />
             </div>
 
             {/* STATUS DOT */}
-            <div className="absolute bottom-6 right-6 w-6 h-6 rounded-full bg-accent border-4 border-background shadow-[0_0_15px_hsl(var(--accent)/0.4)] z-20" />
+            <div className="absolute bottom-6 right-6 w-6 h-6 rounded-full bg-emerald-500 border-4 border-background shadow-[0_0_15px_rgba(16,185,129,0.5)] z-20" />
           </motion.div>
 
           {/* TEXT CONTENT */}
           <div className="text-center md:text-left w-full min-w-0">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-              <span className="inline-block text-[10px] sm:text-xs font-mono text-accent tracking-[0.3em] sm:tracking-[0.4em] uppercase bg-accent/10 px-3 sm:px-4 py-1.5 rounded-full border border-accent/20 mb-5 sm:mb-6">
+              <span className="inline-block text-xs sm:text-sm font-mono text-foreground tracking-[0.2em] sm:tracking-[0.25em] uppercase bg-background/80 px-3 sm:px-4 py-1.5 rounded-full border border-border shadow-sm mb-5 sm:mb-6">
                 Experienced Admin & Developer
               </span>
             </motion.div>

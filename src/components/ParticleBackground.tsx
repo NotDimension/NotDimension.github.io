@@ -68,9 +68,9 @@ const Background: React.FC = () => {
             radial-gradient(50vmax 50vmax at 20% 30%, rgba(180,185,195,0.40), transparent 60%),
             radial-gradient(45vmax 45vmax at 80% 70%, rgba(200,205,210,0.35), transparent 60%),
             radial-gradient(35vmax 35vmax at 50% 95%, rgba(150,160,170,0.28), transparent 60%);
-          filter: blur(12px);
+          filter: none;
           will-change: background-position;
-          animation: bgDrift 50s ease-in-out infinite alternate;
+          animation: bgDrift 60s ease-in-out infinite alternate;
         }
         @keyframes bgDrift {
           0%   { background-position: 0 0, 0 0, 0 0, 0 0; }

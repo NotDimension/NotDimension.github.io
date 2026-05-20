@@ -8,7 +8,7 @@ const HeroSection = () => {
   const backgroundPath = "/bg-landscape.jpg";
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#030d08] px-4 sm:px-6">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background px-4 sm:px-6">
       {/* 1. HIDDEN LOADER: Triggers the fade-in once the image is in browser cache */}
       <img
         src={backgroundPath}
@@ -26,7 +26,7 @@ const HeroSection = () => {
             transition={{ duration: 1.2, ease: "easeOut" }}
             className="absolute inset-0 z-0"
             style={{
-              backgroundImage: `linear-gradient(to bottom, rgba(3, 13, 8, 0.5), rgba(3, 13, 8, 1)), url(${backgroundPath})`,
+              backgroundImage: `linear-gradient(to bottom, rgba(241,242,244,0.35), rgba(241,242,244,0.9)), url(${backgroundPath})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -70,7 +70,7 @@ const HeroSection = () => {
             </div>
 
             {/* STATUS DOT */}
-            <div className="absolute bottom-6 right-6 w-6 h-6 rounded-full bg-accent border-4 border-[#030d08] shadow-[0_0_15px_rgba(16,185,129,0.6)] z-20" />
+            <div className="absolute bottom-6 right-6 w-6 h-6 rounded-full bg-accent border-4 border-background shadow-[0_0_15px_hsl(var(--accent)/0.4)] z-20" />
           </motion.div>
 
           {/* TEXT CONTENT */}
@@ -82,7 +82,7 @@ const HeroSection = () => {
             </motion.div>
 
             {/* NAME WITH INDIVIDUAL LETTER HOVER */}
-            <h1 className="text-[clamp(2.25rem,11vw,6rem)] md:text-8xl font-bold font-mono tracking-tighter mb-4 text-white flex justify-center md:justify-start flex-wrap">
+            <h1 className="text-[clamp(2.25rem,11vw,6rem)] md:text-8xl font-bold font-mono tracking-tighter mb-4 text-foreground flex justify-center md:justify-start flex-wrap">
               {name.split("").map((char, index) => (
                 <motion.span
                   key={index}
@@ -90,7 +90,7 @@ const HeroSection = () => {
                   whileHover={{ 
                     scale: 1.3, 
                     y: -10, 
-                    color: "#10b981", 
+                    color: "hsl(220 10% 35%)", 
                     transition: { type: "spring", stiffness: 300 } 
                   }}
                 >

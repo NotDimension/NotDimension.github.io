@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 
 const socials = [
-  { name: "Discord", url: "https://discord.com/users/753556348784083024", icon: "https://cdn.simpleicons.org/discord/ffffff" },
-  { name: "YouTube", url: "https://www.youtube.com/@NotDimension", icon: "https://cdn.simpleicons.org/youtube/ffffff" },
-  { name: "Spotify", url: "https://open.spotify.com/user/31z2sjm4nmep3ecjeibav25czjsa", icon: "https://cdn.simpleicons.org/spotify/ffffff" },
-  { name: "Steam", url: "https://steamcommunity.com/id/notdimension", icon: "https://cdn.simpleicons.org/steam/ffffff" },
-  { name: "GitHub", url: "https://github.com/NotDimension", icon: "https://cdn.simpleicons.org/github/ffffff" },
-  { name: "NameMC", url: "https://namemc.com/profile/NotDimension.1", icon: "https://cdn.simpleicons.org/namemc/ffffff" },
+  { name: "Discord", url: "https://discord.com/users/753556348784083024", icon: "https://cdn.simpleicons.org/discord/000000" },
+  { name: "YouTube", url: "https://www.youtube.com/@NotDimension", icon: "https://cdn.simpleicons.org/youtube/000000" },
+  { name: "Spotify", url: "https://open.spotify.com/user/31z2sjm4nmep3ecjeibav25czjsa", icon: "https://cdn.simpleicons.org/spotify/000000" },
+  { name: "Steam", url: "https://steamcommunity.com/id/notdimension", icon: "https://cdn.simpleicons.org/steam/000000" },
+  { name: "GitHub", url: "https://github.com/NotDimension", icon: "https://cdn.simpleicons.org/github/000000" },
+  { name: "NameMC", url: "https://namemc.com/profile/NotDimension.1", icon: "https://cdn.simpleicons.org/namemc/000000" },
 ];
 
 const ConnectSection = () => {

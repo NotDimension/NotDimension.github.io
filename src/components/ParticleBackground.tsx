@@ -62,12 +62,12 @@ const Background: React.FC = () => {
         .bg-root {
           --mx: 50vw;
           --my: 50vh;
-          background-color: #020617;
+          background-color: #f1f2f4;
           background-image:
-            radial-gradient(420px circle at var(--mx) var(--my), rgba(52,211,153,0.22), transparent 65%),
-            radial-gradient(50vmax 50vmax at 20% 30%, rgba(16,185,129,0.16), transparent 60%),
-            radial-gradient(45vmax 45vmax at 80% 70%, rgba(5,150,105,0.14), transparent 60%),
-            radial-gradient(35vmax 35vmax at 50% 95%, rgba(6,78,59,0.20), transparent 60%);
+            radial-gradient(420px circle at var(--mx) var(--my), rgba(120,130,140,0.22), transparent 65%),
+            radial-gradient(50vmax 50vmax at 20% 30%, rgba(180,185,195,0.40), transparent 60%),
+            radial-gradient(45vmax 45vmax at 80% 70%, rgba(200,205,210,0.35), transparent 60%),
+            radial-gradient(35vmax 35vmax at 50% 95%, rgba(150,160,170,0.28), transparent 60%);
           filter: blur(12px);
           will-change: background-position;
           animation: bgDrift 50s ease-in-out infinite alternate;

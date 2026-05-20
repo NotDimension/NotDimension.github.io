@@ -28,7 +28,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
 
           {/* Profile Picture - Updated with Emerald Glow */}
           <motion.div
-            className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden mb-6 border-2 border-accent/40 shadow-lg shadow-accent/10"
+            className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden mb-6 border-[3px] border-emerald-500/70 shadow-[0_0_30px_rgba(16,185,129,0.25)]"
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -42,7 +42,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
 
           {/* Name Reveal - Updated Hover to Emerald Green */}
           <motion.h1
-            className="flex flex-wrap justify-center text-4xl md:text-6xl font-bold font-mono gap-1 text-white"
+            className="flex flex-wrap justify-center text-4xl md:text-6xl font-bold font-mono gap-1 text-foreground"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -53,7 +53,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 20 }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
-                whileHover={{ scale: 1.3, y: -5, color: "hsl(155 100% 45%)" }}
+                whileHover={{ scale: 1.3, y: -5, color: "hsl(155 70% 38%)" }}
                 style={{ display: "inline-block" }}
               >
                 {char}
@@ -63,7 +63,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
 
           {/* Subtitle - Using Accent color for a forest vibe */}
           <motion.p
-            className="mt-4 text-sm md:text-base text-accent/60 tracking-[0.2em] uppercase font-mono"
+            className="mt-4 text-sm md:text-base text-muted-foreground tracking-[0.2em] uppercase font-mono"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 10 }}
             transition={{ duration: 0.5, delay: 1 }}

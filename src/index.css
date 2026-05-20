@@ -101,21 +101,25 @@
 .glass-card,
 .role-card {
   position: relative;
-  background: var(--gradient-card);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid hsl(var(--accent) / 0.18);
+  background: hsl(0 0% 100% / 0.9);
+  border: 1px solid hsl(220 8% 82%);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
+  box-shadow:
+    0 1px 2px hsl(220 10% 20% / 0.04),
+    0 4px 12px hsl(220 10% 20% / 0.06),
+    0 12px 30px -10px hsl(220 10% 20% / 0.10);
   transition: transform 0.4s var(--transition-smooth), border-color 0.4s ease, box-shadow 0.4s ease;
   will-change: transform;
 }
 
 .glass-card:hover,
 .role-card:hover {
-  transform: translateY(-4px);
-  border-color: hsl(var(--accent) / 0.55);
-  box-shadow: var(--shadow-glow), 0 12px 40px hsl(0 0% 0% / 0.5);
+  transform: translateY(-3px);
+  border-color: hsl(220 8% 70%);
+  box-shadow:
+    0 2px 4px hsl(220 10% 20% / 0.06),
+    0 8px 20px hsl(220 10% 20% / 0.10),
+    0 20px 40px -10px hsl(220 10% 20% / 0.18);
 }
 
 /* =========================================================

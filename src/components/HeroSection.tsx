@@ -54,9 +54,9 @@ const HeroSection = () => {
               style={{ willChange: "opacity", transform: "translateZ(0)" }}
             />
 
-            {/* Image container with GREEN ring */}
+            {/* Image container with dark gray ring */}
             <div
-              className="relative w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-[3px] border-emerald-500/80 shadow-[0_0_40px_rgba(16,185,129,0.25)] transition-[border-color,box-shadow] duration-500 group-hover:border-emerald-400 group-hover:shadow-[0_0_60px_rgba(16,185,129,0.45)]"
+              className="relative w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full overflow-hidden border-[3px] border-zinc-700/80 shadow-[0_0_40px_rgba(63,63,70,0.3)] transition-[border-color,box-shadow] duration-500 group-hover:border-zinc-500 group-hover:shadow-[0_0_60px_rgba(115,115,115,0.4)]"
               style={{ transform: "translateZ(0)" }}
             >
               <img

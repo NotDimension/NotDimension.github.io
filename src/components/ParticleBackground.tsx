@@ -1,17 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * CSS GRADIENT BACKGROUND + CURSOR SPOTLIGHT
- * - Zero canvas. Pure CSS radial gradients.
- * - One rAF-throttled pointermove updates two CSS vars for an interactive glow.
- * - Reduced blur for crisper visuals and lower GPU cost.
- * - Disabled on touch / reduced motion.
+ * OPTIMIZED DARK GRADIENT BACKGROUND + PROMINENT SPOTLIGHT
+ * - Layers separated: Static ambient blobs and the interactive spotlight are on different layers.
+ * - This prevents the browser from repainting the complex static gradients on every mouse move.
+ * - Dark mode colors with prominent, high-contrast atmospheric glows.
+ * - Math.round() added to prevent sub-pixel rendering lag.
  */
 const Background: React.FC = () => {
-  const ref = useRef<HTMLDivElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = ref.current;
+    const el = spotlightRef.current;
     if (!el) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (window.matchMedia('(hover: none)').matches) return;
@@ -27,8 +27,11 @@ const Background: React.FC = () => {
       // ease toward target
       x += (tx - x) * 0.08;
       y += (ty - y) * 0.08;
-      el.style.setProperty('--mx', `${x}px`);
-      el.style.setProperty('--my', `${y}px`);
+      
+      // Rounding to integers stops the GPU from calculating sub-pixels, boosting performance
+      el.style.setProperty('--mx', `${Math.round(x)}px`);
+      el.style.setProperty('--my', `${Math.round(y)}px`);
+      
       if (Math.abs(tx - x) > 0.5 || Math.abs(ty - y) > 0.5) {
         raf = requestAnimationFrame(tick);
       } else {
@@ -54,30 +57,41 @@ const Background: React.FC = () => {
 
   return (
     <div
-      ref={ref}
       aria-hidden="true"
-      className="bg-root fixed inset-0 z-[-1] overflow-hidden pointer-events-none"
+      className="bg-base fixed inset-0 z-[-1] overflow-hidden pointer-events-none"
     >
+      {/* Spotlight Layer - Isolated on its own div for maximum performance */}
+      <div ref={spotlightRef} className="bg-spotlight absolute inset-0" />
+
       <style>{`
-        .bg-root {
+        .bg-base {
+          background-color: #030712; /* Deep, almost-black slate */
+          background-image:
+            radial-gradient(50vmax 50vmax at 20% 30%, rgba(59, 130, 246, 0.15), transparent 70%), /* Vibrant blue */
+            radial-gradient(60vmax 60vmax at 80% 70%, rgba(139, 92, 246, 0.15), transparent 70%), /* Deep purple */
+            radial-gradient(40vmax 40vmax at 50% 90%, rgba(14, 165, 233, 0.12), transparent 70%); /* Bright sky blue */
+          animation: bgDrift 40s ease-in-out infinite alternate;
+        }
+
+        .bg-spotlight {
           --mx: 50vw;
           --my: 50vh;
-          background-color: #f1f2f4;
-          background-image:
-            radial-gradient(420px circle at var(--mx) var(--my), rgba(120,130,140,0.22), transparent 65%),
-            radial-gradient(50vmax 50vmax at 20% 30%, rgba(180,185,195,0.40), transparent 60%),
-            radial-gradient(45vmax 45vmax at 80% 70%, rgba(200,205,210,0.35), transparent 60%),
-            radial-gradient(35vmax 35vmax at 50% 95%, rgba(150,160,170,0.28), transparent 60%);
-          filter: none;
-          will-change: background-position;
-          animation: bgDrift 60s ease-in-out infinite alternate;
+          /* Prominent spotlight: larger radius, crisp white/cyan tint */
+          background-image: radial-gradient(
+            600px circle at var(--mx) var(--my),
+            rgba(255, 255, 255, 0.08),
+            transparent 60%
+          );
+          will-change: background-image;
         }
+
         @keyframes bgDrift {
-          0%   { background-position: 0 0, 0 0, 0 0, 0 0; }
-          100% { background-position: 0 0, -3% 2%, 2% -2%, -1% -3%; }
+          0%   { background-position: 0 0, 0 0, 0 0; }
+          100% { background-position: -5% 3%, 4% -4%, -2% -3%; }
         }
+
         @media (prefers-reduced-motion: reduce) {
-          .bg-root { animation: none; }
+          .bg-base { animation: none; }
         }
       `}</style>
     </div>

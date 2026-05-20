@@ -26,9 +26,9 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
         >
           {/* Particles render globally from App.tsx */}
 
-          {/* Profile Picture - Updated with Emerald Glow */}
+          {/* Profile Picture - Updated with Dark Gray Ring & Matching Neutral Shadow */}
           <motion.div
-            className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden mb-6 border-[3px] border-emerald-500/70 shadow-[0_0_30px_rgba(16,185,129,0.25)]"
+            className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden mb-6 border-[3px] border-zinc-700/80 shadow-[0_0_30px_rgba(63,63,70,0.3)]"
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -40,7 +40,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
             />
           </motion.div>
 
-          {/* Name Reveal - Updated Hover to Emerald Green */}
+          {/* Name Reveal - Updated Hover from Emerald Green to a Premium Gray */}
           <motion.h1
             className="flex flex-wrap justify-center text-4xl md:text-6xl font-bold font-mono gap-1 text-foreground"
             initial={{ opacity: 0 }}
@@ -53,7 +53,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 20 }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
-                whileHover={{ scale: 1.3, y: -5, color: "hsl(155 70% 38%)" }}
+                whileHover={{ scale: 1.3, y: -5, color: "hsl(215 15% 45%)" }}
                 style={{ display: "inline-block" }}
               >
                 {char}
@@ -61,7 +61,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
             ))}
           </motion.h1>
 
-          {/* Subtitle - Using Accent color for a forest vibe */}
+          {/* Subtitle */}
           <motion.p
             className="mt-4 text-sm md:text-base text-muted-foreground tracking-[0.2em] uppercase font-mono"
             initial={{ opacity: 0, y: 10 }}

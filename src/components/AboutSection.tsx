@@ -26,7 +26,7 @@ const AboutSection = () => {
           </p>
           
           {/* Stats row */}
-          <div className="grid grid-cols-3 gap-4 mt-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-10">
             {[
               { value: "12+", label: "Servers Managed/Staffed In" },
               { value: "70k+", label: "Community Members" },
@@ -38,10 +38,10 @@ const AboutSection = () => {
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
-                className="text-center py-4 rounded-lg bg-secondary/20 border border-border/50"
+                className="text-center py-4 px-2 rounded-lg bg-secondary/20 border border-border/50 min-w-0"
               >
                 <div className="text-2xl md:text-3xl font-bold text-primary font-mono mb-1">{stat.value}</div>
-                <div className="text-xs text-muted-foreground font-mono">{stat.label}</div>
+                <div className="text-[11px] sm:text-xs text-muted-foreground font-mono leading-snug break-words">{stat.label}</div>
               </motion.div>
             ))}
           </div>

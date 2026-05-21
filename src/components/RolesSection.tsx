@@ -45,10 +45,10 @@ const RoleCard = ({ role, index }: { role: Role; index: number }) => {
       whileInView={{ y: 0, opacity: 1 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="role-card rounded-xl p-6 flex items-start gap-5 group cursor-pointer"
+      className="role-card rounded-xl p-4 sm:p-6 flex items-start gap-3 sm:gap-5 group cursor-pointer min-w-0"
     >
-      <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-secondary ring-1 ring-border group-hover:ring-primary/30 transition-all">
-        <img src={role.icon} alt={role.name} className="w-full h-full object-cover" />
+      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 bg-secondary ring-1 ring-border group-hover:ring-primary/30 transition-all">
+        <img src={role.icon} alt={role.name} width="64" height="64" loading="lazy" decoding="async" className="w-full h-full object-cover" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">

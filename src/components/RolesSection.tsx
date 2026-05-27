@@ -37,7 +37,7 @@ const RoleCard = ({ role, index }: { role: RoleEntry; index: number }) => {
           referrerPolicy="no-referrer"
           onError={(e) => {
             const img = e.currentTarget;
-            if (img.src !== window.location.origin + role.icon) img.src = role.icon;
+            if (!img.src.endsWith(role.icon)) img.src = role.icon;
           }}
           className="w-full h-full object-cover"
         />

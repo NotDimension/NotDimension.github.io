@@ -1,15 +1,7 @@
 import { motion } from "framer-motion";
 import { ExternalLink, Users, Crown, Shield, Star } from "lucide-react";
 import { useDiscordInvite, formatMembers } from "@/hooks/useDiscordInvite";
-
-interface Role {
-  name: string;
-  role: string;
-  members: string;
-  icon: string;
-  discord: string;
-  description?: string;
-}
+import { currentRoles, previousRoles, type RoleEntry } from "@/data/roles";
 
 const roleIcon = (role: string) => {
   if (role.includes("Owner")) return Crown;
@@ -17,26 +9,7 @@ const roleIcon = (role: string) => {
   return Star;
 };
 
-const currentRoles: Role[] = [
-  { name: "SMP Finder", role: "Admin/SRA", members: "45k", icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/pQ8tvD533J", description: "Helping players find and join the best SMP servers." },
-  { name: "smpfinder.com", role: "Moderator", members: "1.3k", icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/XvKk2W6KXx", description: "Community hub for the smpfinder.com server list — moderating chat and helping members." },
-  { name: "ShadySMP", role: "Co-Owner", members: "450", icon: "/images/icons/shady.png", discord: "https://discord.gg/Jg48d8xbcD", description: "A community-oriented SMP with custom plugins, events, and a growing player base." },
-];
-
-const previousRoles: Role[] = [
-  
-  { name: "ShatterMC", role: "Senior Admin", members: "260", icon: "/images/icons/shatter.png", discord: "https://discord.gg/sfSnvmtFfA", description: "Managed server operations and staff coordination." },
-  { name: "OceanMC", role: "Owner", members: "300", icon: "/images/icons/ocean.png", discord: "https://discord.gg/YEgAUe8UMp", description: "Founded and managed a custom ocean-themed SMP." },
-  { name: "SteakySMP (Now RambleSMP)", role: "Co-Owner", members: "2k", icon: "/images/icons/steaky.png", discord: "https://discord.gg/nGVcVzK6", description: "Co-managed a large community SMP with events and plugins." },
-  { name: "BonkMC", role: "Moderator", members: "7k", icon: "/images/icons/bonk.png", discord: "https://discord.gg/XV4EGPxHqc", description: "Moderated one of the larger community servers." },
-  { name: "Nebular SMP", role: "Overseer/Co-Owner", members: "200", icon: "/images/icons/nebular.png", discord: "https://discord.gg/YYwWMXxKAz", description: "Oversaw server operations and community growth." },
-  { name: "Discord Collective", role: "Manager", members: "120", icon: "/images/icons/collective.png", discord: "https://discord.gg/nUMJ52Pycj", description: "A server focused on community and events with engaged members." },
-  { name: "Shade Network", role: "Owner", members: "350", icon: "/images/icons/shade.png", discord: "https://discord.gg/yRSHNEnb7Z", description: "A community-oriented Network with Economy and Lifesteal gamemodes." },
-  { name: "Prism SMP (Now AxonMC)", role: "Owner/Staff Manager", members: "800", icon: "/images/icons/axon.png", discord: "https://discord.gg/cVBDxNxP5c", description: "Led a thriving SMP community with custom gameplay systems." },
-  { name: "Echo Network", role: "Helper", members: "4k", icon: "/images/icons/echo.png", discord: "https://discord.gg/fVZPJuEcaQ", description: "A economy server based in NA! Helped with tickets and reports." },
-];
-
-const RoleCard = ({ role, index }: { role: Role; index: number }) => {
+const RoleCard = ({ role, index }: { role: RoleEntry; index: number }) => {
   const RoleIcon = roleIcon(role.role);
   const live = useDiscordInvite(role.discord);
   const iconSrc = live?.iconUrl || role.icon;
@@ -64,7 +37,7 @@ const RoleCard = ({ role, index }: { role: Role; index: number }) => {
           referrerPolicy="no-referrer"
           onError={(e) => {
             const img = e.currentTarget;
-            if (img.src !== window.location.origin + role.icon) img.src = role.icon;
+            if (!img.src.endsWith(role.icon)) img.src = role.icon;
           }}
           className="w-full h-full object-cover"
         />

@@ -1,11 +1,17 @@
 import { motion } from "framer-motion";
-import { ExternalLink, Users, Wrench, BookOpen, Archive } from "lucide-react";
+import { ExternalLink, Users, Wrench, Archive } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { currentRoles } from "@/data/roles";
+import { useDiscordInvite, formatMembers } from "@/hooks/useDiscordInvite";
 
-const liveProjects = [
-  { name: "ShadySMP", role: "Co‑Owner", members: "450+", icon: "/images/icons/shady.png", discord: "https://discord.gg/Jg48d8xbcD", desc: "A community‑oriented SMP with custom plugins, events, and a growing player base." },
-  { name: "SMPFinder", role: "Admin/SRA", members: "45k", icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/pQ8tvD533J", desc: "Discover the best Minecraft SMP servers with SMP Finder." },
-];
+const liveProjects = currentRoles.map((r) => ({
+  name: r.name,
+  role: r.role,
+  members: r.members,
+  icon: r.icon,
+  discord: r.discord,
+  desc: r.description ?? "",
+}));
 
 const technicalCreations = [
   { title: "Plugin Configurations", desc: "Custom YAML & JSON configurations for plugins like EssentialsX, LuckPerms, and more.", tags: ["Economy", "Ranks", "Custom Items"] },
@@ -24,6 +30,52 @@ const archivedProjects = [
   { name: "Echo Network", role: "Helper", members: "4k", icon: "/images/icons/echo.png", note: "Removed due to inactivity." },
 ];
 
+const LiveProjectCard = ({ p, i }: { p: (typeof liveProjects)[number]; i: number }) => {
+  const live = useDiscordInvite(p.discord);
+  const iconSrc = live?.iconUrl || p.icon;
+  const displayName = live?.name || p.name;
+  const memberLabel = live?.memberCount != null ? formatMembers(live.memberCount) : p.members;
+  return (
+    <motion.a
+      href={p.discord}
+      target="_blank"
+      rel="noopener noreferrer"
+      initial={{ y: 20, opacity: 0 }}
+      whileInView={{ y: 0, opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay: i * 0.08 }}
+      className="role-card rounded-xl p-6 flex items-start gap-5 group cursor-pointer"
+    >
+      <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-secondary">
+        <img
+          src={iconSrc}
+          alt={displayName}
+          referrerPolicy="no-referrer"
+          loading="lazy"
+          decoding="async"
+          onError={(e) => {
+            if (!e.currentTarget.src.endsWith(p.icon)) e.currentTarget.src = p.icon;
+          }}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="font-bold text-foreground truncate">{displayName}</h3>
+          <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary flex-shrink-0">Active</span>
+          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+        </div>
+        <p className="text-sm text-primary font-mono mb-1">{p.role}</p>
+        {p.desc && <p className="text-xs text-muted-foreground mb-2">{p.desc}</p>}
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <Users className="w-3 h-3" />
+          <span className="text-xs font-mono">{memberLabel} members</span>
+        </div>
+      </div>
+    </motion.a>
+  );
+};
+
 const Projects = () => (
   <div className="page-container noise-overlay relative z-10 min-h-screen">
     <PageHeader title="Projects" subtitle="A showcase of Minecraft server projects I've been involved with." />
@@ -34,27 +86,7 @@ const Projects = () => (
           <h2 className="text-sm font-mono text-primary mb-6 tracking-widest uppercase">// Live Projects</h2>
           <div className="grid gap-4">
             {liveProjects.map((p, i) => (
-              <motion.a key={p.name} href={p.discord} target="_blank" rel="noopener noreferrer"
-                initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="role-card rounded-xl p-6 flex items-start gap-5 group cursor-pointer"
-              >
-                <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-secondary">
-                  <img src={p.icon} alt={p.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-foreground">{p.name}</h3>
-                    <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary">Active</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <p className="text-sm text-primary font-mono mb-1">{p.role}</p>
-                  <p className="text-xs text-muted-foreground mb-2">{p.desc}</p>
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Users className="w-3 h-3" /><span className="text-xs font-mono">{p.members} members</span>
-                  </div>
-                </div>
-              </motion.a>
+              <LiveProjectCard key={p.name} p={p} i={i} />
             ))}
           </div>
         </section>

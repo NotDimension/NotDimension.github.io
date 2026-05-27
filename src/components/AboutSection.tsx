@@ -1,6 +1,19 @@
 import { motion } from "framer-motion";
+import { allRoles, staticTotalMembers } from "@/data/roles";
+import { useDiscordInvitesTotal, extractCode, formatMembers } from "@/hooks/useDiscordInvite";
+
 
 const AboutSection = () => {
+  const fallbacks = Object.fromEntries(
+    allRoles.map((r) => [extractCode(r.discord), r.staticMembers])
+  );
+  const totalMembers = useDiscordInvitesTotal(
+    allRoles.map((r) => r.discord),
+    staticTotalMembers,
+    fallbacks
+  );
+  const memberLabel = `${formatMembers(totalMembers)}+`;
+  const serverLabel = `${allRoles.length}+`;
   return (
     <section className="py-28 px-4 relative">
       {/* Section divider */}
@@ -28,8 +41,8 @@ const AboutSection = () => {
           {/* Stats row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-10">
             {[
-              { value: "12+", label: "Servers Managed/Staffed In" },
-              { value: "70k+", label: "Community Members" },
+              { value: serverLabel, label: "Servers Managed/Staffed In" },
+              { value: memberLabel, label: "Community Members" },
               { value: "12+", label: "Months Experience" },
             ].map((stat, i) => (
               <motion.div

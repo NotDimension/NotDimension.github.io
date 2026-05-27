@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ExternalLink, Users, Crown, Shield, Star } from "lucide-react";
+import { useDiscordInvite, formatMembers } from "@/hooks/useDiscordInvite";
 
 interface Role {
   name: string;

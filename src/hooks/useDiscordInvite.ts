@@ -99,3 +99,70 @@ export function formatMembers(n: number | null | undefined): string {
   }
   return String(n);
 }
+
+/**
+ * Fetch live counts for a list of invites and return the aggregate total.
+ * Falls back to `fallbackTotal` whenever an invite can't be parsed.
+ */
+export function useDiscordInvitesTotal(
+  invites: string[],
+  fallbackTotal: number,
+  fallbacks?: Record<string, number>
+): number {
+  const codes = invites.map(extractCode).filter(Boolean);
+  const [counts, setCounts] = useState<Record<string, number>>(() => {
+    const initial: Record<string, number> = {};
+    for (const code of codes) {
+      const c = cache.get(code);
+      if (c?.data.memberCount != null) initial[code] = c.data.memberCount;
+    }
+    return initial;
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    codes.forEach((code) => {
+      const cached = cache.get(code);
+      if (cached && Date.now() - cached.ts < CACHE_TTL) {
+        if (cached.data.memberCount != null) {
+          setCounts((p) => (p[code] === cached.data.memberCount ? p : { ...p, [code]: cached.data.memberCount! }));
+        }
+        return;
+      }
+      let promise = inflight.get(code);
+      if (!promise) {
+        promise = fetchInvite(code).finally(() => inflight.delete(code));
+        inflight.set(code, promise);
+      }
+      promise.then((d) => {
+        if (cancelled || !d || d.memberCount == null) return;
+        setCounts((p) => ({ ...p, [code]: d.memberCount! }));
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [codes.join("|")]);
+
+  // For every code: prefer live -> per-code fallback -> nothing.
+  let total = 0;
+  let liveAny = false;
+  for (const code of codes) {
+    if (counts[code] != null) {
+      total += counts[code];
+      liveAny = true;
+    } else if (fallbacks && fallbacks[code] != null) {
+      total += fallbacks[code];
+    }
+  }
+  // If nothing resolved live AND no per-code fallbacks were given, use the bulk fallback.
+  if (!liveAny && (!fallbacks || Object.keys(fallbacks).length === 0)) {
+    return fallbackTotal;
+  }
+  // If some live values came in but we have no fallback for the others, use bulk fallback as a floor.
+  return Math.max(total, fallbackTotal);
+}
+
+export { extractCode };
+

@@ -38,6 +38,10 @@ const previousRoles: Role[] = [
 
 const RoleCard = ({ role, index }: { role: Role; index: number }) => {
   const RoleIcon = roleIcon(role.role);
+  const live = useDiscordInvite(role.discord);
+  const iconSrc = live?.iconUrl || role.icon;
+  const displayName = live?.name || role.name;
+  const memberLabel = live?.memberCount != null ? formatMembers(live.memberCount) : role.members;
   return (
     <motion.a
       href={role.discord}
@@ -50,11 +54,24 @@ const RoleCard = ({ role, index }: { role: Role; index: number }) => {
       className="role-card rounded-xl p-4 sm:p-6 flex items-start gap-3 sm:gap-5 group cursor-pointer min-w-0"
     >
       <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 bg-secondary ring-1 ring-border group-hover:ring-primary/30 transition-all">
-        <img src={role.icon} alt={role.name} width="64" height="64" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+        <img
+          src={iconSrc}
+          alt={displayName}
+          width="64"
+          height="64"
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={(e) => {
+            const img = e.currentTarget;
+            if (img.src !== window.location.origin + role.icon) img.src = role.icon;
+          }}
+          className="w-full h-full object-cover"
+        />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-bold text-foreground text-base truncate">{role.name}</h3>
+          <h3 className="font-bold text-foreground text-base truncate">{displayName}</h3>
           <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
         </div>
         <div className="flex items-center gap-2 mb-2">
@@ -66,7 +83,7 @@ const RoleCard = ({ role, index }: { role: Role; index: number }) => {
         )}
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Users className="w-3.5 h-3.5" />
-          <span className="text-xs font-mono">{role.members} members</span>
+          <span className="text-xs font-mono">{memberLabel} members</span>
         </div>
       </div>
     </motion.a>

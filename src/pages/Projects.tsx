@@ -1,11 +1,17 @@
 import { motion } from "framer-motion";
-import { ExternalLink, Users, Wrench, BookOpen, Archive } from "lucide-react";
+import { ExternalLink, Users, Wrench, Archive } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { currentRoles } from "@/data/roles";
+import { useDiscordInvite, formatMembers } from "@/hooks/useDiscordInvite";
 
-const liveProjects = [
-  { name: "ShadySMP", role: "Co‑Owner", members: "450+", icon: "/images/icons/shady.png", discord: "https://discord.gg/Jg48d8xbcD", desc: "A community‑oriented SMP with custom plugins, events, and a growing player base." },
-  { name: "SMPFinder", role: "Admin/SRA", members: "45k", icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/pQ8tvD533J", desc: "Discover the best Minecraft SMP servers with SMP Finder." },
-];
+const liveProjects = currentRoles.map((r) => ({
+  name: r.name,
+  role: r.role,
+  members: r.members,
+  icon: r.icon,
+  discord: r.discord,
+  desc: r.description ?? "",
+}));
 
 const technicalCreations = [
   { title: "Plugin Configurations", desc: "Custom YAML & JSON configurations for plugins like EssentialsX, LuckPerms, and more.", tags: ["Economy", "Ranks", "Custom Items"] },

@@ -4,6 +4,16 @@ import { useDiscordInvitesTotal, extractCode, formatMembers } from "@/hooks/useD
 
 
 const AboutSection = () => {
+  const fallbacks = Object.fromEntries(
+    allRoles.map((r) => [extractCode(r.discord), r.staticMembers])
+  );
+  const totalMembers = useDiscordInvitesTotal(
+    allRoles.map((r) => r.discord),
+    staticTotalMembers,
+    fallbacks
+  );
+  const memberLabel = `${formatMembers(totalMembers)}+`;
+  const serverLabel = `${allRoles.length}+`;
   return (
     <section className="py-28 px-4 relative">
       {/* Section divider */}

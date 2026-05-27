@@ -131,20 +131,7 @@ const Contact = () => (
           <h2 className="text-sm font-mono text-primary mb-6 tracking-widest uppercase">// Find Me In These Communities</h2>
           <div className="grid gap-3">
             {communities.map((c, i) => (
-              <motion.a key={c.name} href={c.discord} target="_blank" rel="noopener noreferrer"
-                initial={{ y: 15, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.08 }}
-                className="role-card rounded-xl p-5 flex items-center gap-4 group cursor-pointer"
-              >
-                <div className="w-12 h-12 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                  <img src={c.icon} alt={c.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-foreground text-sm">{c.name}</h3>
-                  <p className="text-xs text-muted-foreground font-mono">{c.role} • {c.members} members</p>
-                </div>
-                <Users className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-              </motion.a>
+              <CommunityCard key={c.name} c={c} i={i} />
             ))}
           </div>
         </section>

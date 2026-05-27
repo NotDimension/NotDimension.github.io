@@ -9,7 +9,7 @@ const roleIcon = (role: string) => {
   return Star;
 };
 
-const RoleCard = ({ role, index }: { role: Role; index: number }) => {
+const RoleCard = ({ role, index }: { role: RoleEntry; index: number }) => {
   const RoleIcon = roleIcon(role.role);
   const live = useDiscordInvite(role.discord);
   const iconSrc = live?.iconUrl || role.icon;

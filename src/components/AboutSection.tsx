@@ -1,4 +1,7 @@
 import { motion } from "framer-motion";
+import { allRoles, staticTotalMembers } from "@/data/roles";
+import { useDiscordInvitesTotal, extractCode, formatMembers } from "@/hooks/useDiscordInvite";
+
 
 const AboutSection = () => {
   return (

@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { m, useAnimation } from "framer-motion";
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -45,13 +45,13 @@ const ScrollReveal = ({
 
   return (
     <div ref={ref} className={className}>
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y }}
         animate={controls}
         style={{ willChange: "transform, opacity" }}
       >
         {children}
-      </motion.div>
+      </m.div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { allRoles, staticTotalMembers } from "@/data/roles";
 import { useDiscordInvitesTotal, extractCode, formatMembers } from "@/hooks/useDiscordInvite";
 
@@ -20,7 +20,7 @@ const AboutSection = () => {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
       
       <div className="container max-w-3xl mx-auto">
-        <motion.div
+        <m.div
           initial={{ y: 50, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -45,7 +45,7 @@ const AboutSection = () => {
               { value: memberLabel, label: "Community Members" },
               { value: "12+", label: "Months Experience" },
             ].map((stat, i) => (
-              <motion.div
+              <m.div
                 key={stat.label}
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
@@ -55,10 +55,10 @@ const AboutSection = () => {
               >
                 <div className="text-2xl md:text-3xl font-bold text-primary font-mono mb-1">{stat.value}</div>
                 <div className="text-[11px] sm:text-xs text-muted-foreground font-mono leading-snug break-words">{stat.label}</div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

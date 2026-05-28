@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { MessageSquare, Mail, Clock, Users, ExternalLink } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { currentRoles } from "@/data/roles";
@@ -25,7 +25,7 @@ const CommunityCard = ({ c, i }: { c: (typeof communities)[number]; i: number })
   const displayName = live?.name || c.name;
   const memberLabel = live?.memberCount != null ? formatMembers(live.memberCount) : c.members;
   return (
-    <motion.a
+    <m.a
       href={c.discord}
       target="_blank"
       rel="noopener noreferrer"
@@ -53,7 +53,7 @@ const CommunityCard = ({ c, i }: { c: (typeof communities)[number]; i: number })
         <p className="text-xs text-muted-foreground font-mono">{c.role} • {memberLabel} members</p>
       </div>
       <Users className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-    </motion.a>
+    </m.a>
   );
 };
 
@@ -66,7 +66,7 @@ const Contact = () => (
         <section>
           <h2 className="text-sm font-mono text-primary mb-6 tracking-widest uppercase">// Ways to Reach Me</h2>
           <div className="grid gap-4">
-            <motion.a href="https://discord.com/users/753556348784083024" target="_blank" rel="noopener noreferrer"
+            <m.a href="https://discord.com/users/753556348784083024" target="_blank" rel="noopener noreferrer"
               initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }}
               className="role-card rounded-xl p-6 group cursor-pointer"
             >
@@ -84,9 +84,9 @@ const Contact = () => (
                 </div>
                 <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
               </div>
-            </motion.a>
+            </m.a>
 
-            <motion.a href="mailto:notdimension@gmail.com"
+            <m.a href="mailto:notdimension@gmail.com"
               initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, delay: 0.1 }}
               className="role-card rounded-xl p-6 group cursor-pointer"
             >
@@ -104,7 +104,7 @@ const Contact = () => (
                 </div>
                 <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
               </div>
-            </motion.a>
+            </m.a>
           </div>
         </section>
 
@@ -113,7 +113,7 @@ const Contact = () => (
           <h2 className="text-sm font-mono text-primary mb-6 tracking-widest uppercase">// Response Times</h2>
           <div className="grid grid-cols-3 gap-3">
             {responseTimes.map((r, i) => (
-              <motion.div key={r.label}
+              <m.div key={r.label}
                 initial={{ y: 15, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: i * 0.08 }}
                 className="glass-card rounded-xl p-4 text-center"
@@ -121,7 +121,7 @@ const Contact = () => (
                 <Clock className="w-4 h-4 text-primary mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground mb-1">{r.label}</p>
                 <p className={`text-sm font-mono font-semibold ${r.color}`}>{r.time}</p>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </section>

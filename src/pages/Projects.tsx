@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ExternalLink, Users, Wrench, Archive } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { currentRoles } from "@/data/roles";
@@ -36,7 +36,7 @@ const LiveProjectCard = ({ p, i }: { p: (typeof liveProjects)[number]; i: number
   const displayName = live?.name || p.name;
   const memberLabel = live?.memberCount != null ? formatMembers(live.memberCount) : p.members;
   return (
-    <motion.a
+    <m.a
       href={p.discord}
       target="_blank"
       rel="noopener noreferrer"
@@ -72,7 +72,7 @@ const LiveProjectCard = ({ p, i }: { p: (typeof liveProjects)[number]; i: number
           <span className="text-xs font-mono">{memberLabel} members</span>
         </div>
       </div>
-    </motion.a>
+    </m.a>
   );
 };
 
@@ -96,7 +96,7 @@ const Projects = () => (
           <h2 className="text-sm font-mono text-primary mb-6 tracking-widest uppercase">// Technical Creations</h2>
           <div className="grid gap-4">
             {technicalCreations.map((t, i) => (
-              <motion.div key={t.title}
+              <m.div key={t.title}
                 initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
                 className="glass-card rounded-xl p-6"
@@ -113,7 +113,7 @@ const Projects = () => (
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </section>
@@ -125,20 +125,20 @@ const Projects = () => (
           </h2>
           <div className="grid gap-3">
             {archivedProjects.map((p, i) => (
-              <motion.div key={p.name}
+              <m.div key={p.name}
                 initial={{ y: 15, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: i * 0.06 }}
                 className="glass-card rounded-lg p-4 flex items-center gap-4 opacity-70 hover:opacity-100 transition-opacity"
               >
                 <div className="w-10 h-10 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                  <img src={p.icon} alt={p.name} className="w-full h-full object-cover" />
+                  <img src={p.icon} alt={p.name} width="48" height="48" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground text-sm">{p.name}</h3>
                   <p className="text-xs text-muted-foreground font-mono">{p.role} • {p.members} members</p>
                 </div>
                 <span className="text-xs text-muted-foreground font-mono flex-shrink-0">{p.note}</span>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </section>

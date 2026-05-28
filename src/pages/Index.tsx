@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import IntroAnimation from "@/components/IntroAnimation";
 import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
@@ -21,7 +21,7 @@ const Index = () => {
 
       {/* Main content fades in after intro */}
       {introComplete && (
-        <motion.div
+        <m.div
           className="relative noise-overlay app-bg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -37,7 +37,7 @@ const Index = () => {
             <div className="cv-auto section-divider"><ExploreSection /></div>
             <div className="cv-auto section-divider"><ConnectSection /></div>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </>
   );

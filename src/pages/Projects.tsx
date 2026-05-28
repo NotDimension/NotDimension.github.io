@@ -131,7 +131,7 @@ const Projects = () => (
                 className="glass-card rounded-lg p-4 flex items-center gap-4 opacity-70 hover:opacity-100 transition-opacity"
               >
                 <div className="w-10 h-10 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
-                  <img src={p.icon} alt={p.name} className="w-full h-full object-cover" />
+                  <img src={p.icon} alt={p.name} width="48" height="48" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground text-sm">{p.name}</h3>

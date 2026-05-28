@@ -36,7 +36,7 @@ const ConnectSection = () => {
                 transition={{ duration: 0.3, delay: i * 0.06 }}
                 className="glass-card rounded-lg px-5 py-3 flex items-center gap-3 group transition-all duration-300 cursor-pointer"
               >
-                <img src={social.icon} alt={social.name} className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity" />
+                <img src={social.icon} alt={social.name} width="16" height="16" loading="lazy" decoding="async" className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity" />
                 <span className="text-sm font-mono text-secondary-foreground group-hover:text-foreground transition-colors">
                   {social.name}
                 </span>

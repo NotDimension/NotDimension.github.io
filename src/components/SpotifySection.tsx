@@ -93,6 +93,10 @@ const SpotifySection = () => {
             <img
               src="https://cdn.simpleicons.org/spotify/ffffff"
               alt="Spotify"
+              width="16"
+              height="16"
+              loading="lazy"
+              decoding="async"
               className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity"
             />
             View my Spotify profile

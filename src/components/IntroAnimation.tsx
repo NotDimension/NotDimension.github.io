@@ -36,6 +36,10 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
             <img
               src="/images/profile.png"
               alt="NotDimension"
+              width="160"
+              height="160"
+              decoding="async"
+              fetchPriority="high"
               className="w-full h-full object-cover"
             />
           </m.div>

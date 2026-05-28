@@ -20,9 +20,9 @@ export interface RoleEntry {
 }
 
 export const currentRoles: RoleEntry[] = [
-  { name: "SMP Finder", role: "Admin/SRA", members: "48k", staticMembers: 48000, icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/pQ8tvD533J", description: "Helping players find and join the best SMP servers." },
+  { name: "SMP Finder", role: "Admin", members: "48k", staticMembers: 48000, icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/pQ8tvD533J", description: "Helping players find and join the best SMP servers." },
   { name: "smpfinder.com", role: "Moderator", members: "1.3k", staticMembers: 1300, icon: "/images/icons/smpfinder.png", discord: "https://discord.gg/XvKk2W6KXx", description: "Community hub for the smpfinder.com server list — moderating chat and helping members." },
-  { name: "ShadySMP", role: "Co-Owner", members: "450", staticMembers: 450, icon: "/images/icons/shady.png", discord: "https://discord.gg/Jg48d8xbcD", description: "A community-oriented SMP with custom plugins, events, and a growing player base." },
+  { name: "ShadySMP", role: "Co-Owner", members: "450", staticMembers: 450, icon: "/images/icons/shady.png", discord: "https://discord.gg/Uq6C8dgP3K", description: "A community-oriented SMP with custom plugins, events, and a growing player base." },
 ];
 
 export const previousRoles: RoleEntry[] = [

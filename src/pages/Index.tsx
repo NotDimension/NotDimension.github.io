@@ -29,13 +29,13 @@ const Index = () => {
         >
           <div className="relative z-10">
             <HeroSection />
-            <div className="cv-auto"><AboutSection /></div>
-            <div className="cv-auto section-divider"><RolesSection /></div>
-            <div className="cv-auto section-divider"><SkillsSection /></div>
-            <div className="cv-auto section-divider"><SpotifySection /></div>
-            <div className="cv-auto section-divider"><LearningSection /></div>
-            <div className="cv-auto section-divider"><ExploreSection /></div>
-            <div className="cv-auto section-divider"><ConnectSection /></div>
+            <div className="mx-auto"><AboutSection /></div>
+            <div className="mx-auto section-divider"><RolesSection /></div>
+            <div className="mx-auto section-divider"><SkillsSection /></div>
+            <div className="mx-auto section-divider"><SpotifySection /></div>
+            <div className="mx-auto section-divider"><LearningSection /></div>
+            <div className="mx-auto section-divider"><ExploreSection /></div>
+            <div className="mx-auto section-divider"><ConnectSection /></div>
           </div>
         </m.div>
       )}

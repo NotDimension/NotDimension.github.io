@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   Server, Users, MessageSquare, Wrench, FileText, Palette,
   Settings, BookOpen, BarChart3, Calendar, Shield, Zap,
@@ -26,7 +26,7 @@ const SkillsSection = () => {
   return (
     <section className="py-24 px-4">
       <div className="container max-w-3xl mx-auto">
-        <motion.div
+        <m.div
           initial={{ y: 40, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -36,7 +36,7 @@ const SkillsSection = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
             {coreSkills.map((skill, i) => (
-              <motion.div
+              <m.div
                 key={skill.label}
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
@@ -53,14 +53,14 @@ const SkillsSection = () => {
                     <p className="text-xs text-muted-foreground leading-relaxed">{skill.desc}</p>
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
 
           <h2 className="text-sm font-mono text-primary mb-8 tracking-widest uppercase">// Daily Responsibilities</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {dailyTasks.map((task, i) => (
-              <motion.div
+              <m.div
                 key={task.text}
                 initial={{ x: -20, opacity: 0 }}
                 whileInView={{ x: 0, opacity: 1 }}
@@ -70,10 +70,10 @@ const SkillsSection = () => {
               >
                 <task.icon className="w-4 h-4 text-primary flex-shrink-0" />
                 <span className="text-sm text-secondary-foreground">{task.text}</span>
-              </motion.div>
+              </m.div>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { BookOpen, ExternalLink } from "lucide-react";
 
 const courses = [
@@ -20,7 +20,7 @@ const LearningSection = () => {
   return (
     <section className="py-24 px-4">
       <div className="container max-w-3xl mx-auto">
-        <motion.div
+        <m.div
           initial={{ y: 40, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -31,7 +31,7 @@ const LearningSection = () => {
           </h2>
           <div className="grid gap-3">
             {courses.map((course, i) => (
-              <motion.a
+              <m.a
                 key={course.title}
                 href={course.url}
                 target="_blank"
@@ -55,10 +55,10 @@ const LearningSection = () => {
                     </span>
                   </div>
                 </div>
-              </motion.a>
+              </m.a>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

@@ -1,11 +1,11 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Music, ExternalLink } from "lucide-react";
 
 const SpotifySection = () => {
   return (
     <section className="py-24 px-4">
       <div className="container max-w-3xl mx-auto">
-        <motion.div
+        <m.div
           initial={{ y: 40, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -17,7 +17,7 @@ const SpotifySection = () => {
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Brent Faiyaz artist embed */}
-            <motion.div
+            <m.div
               initial={{ y: 20, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
@@ -45,10 +45,10 @@ const SpotifySection = () => {
                   title="Brent Faiyaz on Spotify"
                 />
               </div>
-            </motion.div>
+            </m.div>
 
             {/* Lo-fi / chill playlist embed */}
-            <motion.div
+            <m.div
               initial={{ y: 20, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
@@ -76,11 +76,11 @@ const SpotifySection = () => {
                   title="Lo-fi playlist on Spotify"
                 />
               </div>
-            </motion.div>
+            </m.div>
           </div>
 
           {/* Spotify profile link */}
-          <motion.a
+          <m.a
             href="https://open.spotify.com/user/31z2sjm4nmep3ecjeibav25czjsa"
             target="_blank"
             rel="noopener noreferrer"
@@ -97,8 +97,8 @@ const SpotifySection = () => {
             />
             View my Spotify profile
             <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </motion.a>
-        </motion.div>
+          </m.a>
+        </m.div>
       </div>
     </section>
   );

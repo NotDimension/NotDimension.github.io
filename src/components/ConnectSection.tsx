@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 const socials = [
   { name: "Discord", url: "https://discord.com/users/753556348784083024", icon: "https://cdn.simpleicons.org/discord/000000" },
@@ -13,7 +13,7 @@ const ConnectSection = () => {
   return (
     <section className="py-24 px-4">
       <div className="container max-w-3xl mx-auto">
-        <motion.div
+        <m.div
           initial={{ y: 40, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -25,7 +25,7 @@ const ConnectSection = () => {
           </h2>
           <div className="flex flex-wrap justify-center gap-4">
             {socials.map((social, i) => (
-              <motion.a
+              <m.a
                 key={social.name}
                 href={social.url}
                 target="_blank"
@@ -40,10 +40,10 @@ const ConnectSection = () => {
                 <span className="text-sm font-mono text-secondary-foreground group-hover:text-foreground transition-colors">
                   {social.name}
                 </span>
-              </motion.a>
+              </m.a>
             ))}
           </div>
-        </motion.div>
+        </m.div>
 
       </div>
     </section>

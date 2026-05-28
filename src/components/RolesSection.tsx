@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ExternalLink, Users, Crown, Shield, Star } from "lucide-react";
 import { useDiscordInvite, formatMembers } from "@/hooks/useDiscordInvite";
 import { currentRoles, previousRoles, type RoleEntry } from "@/data/roles";
@@ -16,7 +16,7 @@ const RoleCard = ({ role, index }: { role: RoleEntry; index: number }) => {
   const displayName = live?.name || role.name;
   const memberLabel = live?.memberCount != null ? formatMembers(live.memberCount) : role.members;
   return (
-    <motion.a
+    <m.a
       href={role.discord}
       target="_blank"
       rel="noopener noreferrer"
@@ -59,7 +59,7 @@ const RoleCard = ({ role, index }: { role: RoleEntry; index: number }) => {
           <span className="text-xs font-mono">{memberLabel} members</span>
         </div>
       </div>
-    </motion.a>
+    </m.a>
   );
 };
 
@@ -67,7 +67,7 @@ const RolesSection = () => {
   return (
     <section className="py-24 px-4">
       <div className="container max-w-3xl mx-auto">
-        <motion.div
+        <m.div
           initial={{ y: 40, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -79,9 +79,9 @@ const RolesSection = () => {
               <RoleCard key={role.name} role={role} index={i} />
             ))}
           </div>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           initial={{ y: 40, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -93,7 +93,7 @@ const RolesSection = () => {
               <RoleCard key={role.name} role={role} index={i} />
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

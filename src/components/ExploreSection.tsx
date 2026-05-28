@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FolderOpen, Mail, User, ArrowRight } from "lucide-react";
 
@@ -27,7 +27,7 @@ const ExploreSection = () => {
   return (
     <section className="py-24 px-4">
       <div className="container max-w-3xl mx-auto">
-        <motion.div
+        <m.div
           initial={{ y: 40, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -36,7 +36,7 @@ const ExploreSection = () => {
           <h2 className="text-sm font-mono text-primary mb-8 tracking-widest uppercase">// Explore More</h2>
           <div className="grid gap-4">
             {pages.map((page, i) => (
-              <motion.div
+              <m.div
                 key={page.title}
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
@@ -56,10 +56,10 @@ const ExploreSection = () => {
                   </div>
                   <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
                 </Link>
-              </motion.div>
+              </m.div>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

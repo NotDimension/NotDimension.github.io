@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 interface IntroProps {
   onComplete: () => void;
@@ -18,7 +18,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
   return (
     <AnimatePresence>
       {phase < 3 && (
-        <motion.div
+        <m.div
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background/80 backdrop-blur-[1px]"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -27,7 +27,7 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
           {/* Particles render globally from App.tsx */}
 
           {/* Profile Picture - Updated with Dark Gray Ring & Matching Neutral Shadow */}
-          <motion.div
+          <m.div
             className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden mb-6 border-[3px] border-zinc-700/80 shadow-[0_0_30px_rgba(63,63,70,0.3)]"
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -38,17 +38,17 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
               alt="NotDimension"
               className="w-full h-full object-cover"
             />
-          </motion.div>
+          </m.div>
 
           {/* Name Reveal - Updated Hover from Emerald Green to a Premium Gray */}
-          <motion.h1
+          <m.h1
             className="flex flex-wrap justify-center text-4xl md:text-6xl font-bold font-mono gap-1 text-foreground"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             {"NotDimension".split("").map((char, i) => (
-              <motion.span
+              <m.span
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 20 }}
@@ -57,20 +57,20 @@ const IntroAnimation = ({ onComplete }: IntroProps) => {
                 style={{ display: "inline-block" }}
               >
                 {char}
-              </motion.span>
+              </m.span>
             ))}
-          </motion.h1>
+          </m.h1>
 
           {/* Subtitle */}
-          <motion.p
+          <m.p
             className="mt-4 text-sm md:text-base text-muted-foreground tracking-[0.2em] uppercase font-mono"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: phase >= 1 ? 1 : 0, y: phase >= 1 ? 0 : 10 }}
             transition={{ duration: 0.5, delay: 1 }}
           >
             Loading Portfolio...
-          </motion.p>
-        </motion.div>
+          </m.p>
+        </m.div>
       )}
     </AnimatePresence>
   );

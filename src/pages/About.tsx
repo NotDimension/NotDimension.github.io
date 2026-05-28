@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Heart, Music, Gamepad2, Trophy } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 
@@ -37,21 +37,21 @@ const About = () => (
         {/* Background */}
         <section>
           <h2 className="text-sm font-mono text-primary mb-6 tracking-widest uppercase">// Background</h2>
-          <motion.p
+          <m.p
             initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }}
             className="text-secondary-foreground leading-relaxed mb-8"
           >
             I've been managing Minecraft servers for several months, starting as a community helper and progressing to server ownership and senior roles. My focus has always been on creating engaging, harmonious environments where players can enjoy the game together.
-          </motion.p>
+          </m.p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {principles.map((p, i) => (
-              <motion.div key={p}
+              <m.div key={p}
                 initial={{ x: -15, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 + i * 0.06 }}
                 className="flex items-center gap-3 py-3 px-4 rounded-lg bg-secondary/30"
               >
                 <Heart className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                 <span className="text-sm text-secondary-foreground">{p}</span>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </section>
@@ -63,7 +63,7 @@ const About = () => (
             <div className="absolute left-3 top-2 bottom-2 w-px timeline-line" />
             <div className="space-y-6">
               {timeline.map((t, i) => (
-                <motion.div key={t.month}
+                <m.div key={t.month}
                   initial={{ y: 15, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: i * 0.05 }}
                   className="relative"
@@ -75,7 +75,7 @@ const About = () => (
                       <li key={e} className="text-xs text-muted-foreground">• {e}</li>
                     ))}
                   </ul>
-                </motion.div>
+                </m.div>
               ))}
             </div>
           </div>
@@ -86,7 +86,7 @@ const About = () => (
           <h2 className="text-sm font-mono text-primary mb-6 tracking-widest uppercase">// Beyond Servers</h2>
           <div className="grid gap-4">
             {interests.map((int, i) => (
-              <motion.div key={int.title}
+              <m.div key={int.title}
                 initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
                 className="glass-card rounded-xl p-5"
@@ -104,7 +104,7 @@ const About = () => (
                     </ul>
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </section>

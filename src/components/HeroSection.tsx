@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { MapPin, ChevronDown } from "lucide-react";
 
 const HeroSection = () => {
@@ -20,7 +20,7 @@ const HeroSection = () => {
       {/* 2. DYNAMIC BACKGROUND: Fades in only when fully loaded */}
       <AnimatePresence>
         {isLoaded && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
@@ -41,7 +41,7 @@ const HeroSection = () => {
         <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-24">
 
           {/* PROFILE IMAGE */}
-          <motion.div
+          <m.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -72,20 +72,20 @@ const HeroSection = () => {
 
             {/* STATUS DOT */}
             <div className="absolute bottom-6 right-6 w-6 h-6 rounded-full bg-emerald-500 border-4 border-background shadow-[0_0_15px_rgba(16,185,129,0.5)] z-20" />
-          </motion.div>
+          </m.div>
 
           {/* TEXT CONTENT */}
           <div className="text-center md:text-left w-full min-w-0">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+            <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
               <span className="inline-block text-xs sm:text-sm font-mono text-foreground tracking-[0.2em] sm:tracking-[0.25em] uppercase bg-background/80 px-3 sm:px-4 py-1.5 rounded-full border border-border shadow-sm mb-5 sm:mb-6">
                 Experienced Admin & Developer
               </span>
-            </motion.div>
+            </m.div>
 
             {/* NAME WITH INDIVIDUAL LETTER HOVER */}
             <h1 className="text-[clamp(2.25rem,11vw,6rem)] md:text-8xl font-bold font-mono tracking-tighter mb-4 text-foreground flex justify-center md:justify-start flex-wrap">
               {name.split("").map((char, index) => (
-                <motion.span
+                <m.span
                   key={index}
                   className="inline-block cursor-default"
                   whileHover={{ 
@@ -96,11 +96,11 @@ const HeroSection = () => {
                   }}
                 >
                   {char === " " ? "\u00A0" : char}
-                </motion.span>
+                </m.span>
               ))}
             </h1>
 
-            <motion.p 
+            <m.p 
               className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-md mx-auto md:mx-0 mb-8 leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -108,10 +108,10 @@ const HeroSection = () => {
             >
               Building communities, configuring servers, and crafting exceptional 
               Minecraft experiences from South Africa.
-            </motion.p>
+            </m.p>
 
             {/* BADGES */}
-            <motion.div 
+            <m.div 
               className="flex items-center justify-center md:justify-start gap-4 sm:gap-6 text-sm font-mono text-muted-foreground flex-wrap"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -126,16 +126,16 @@ const HeroSection = () => {
                 <div className="w-2 h-2 rounded-full bg-accent animate-pulse" /> 
                 <span>Available</span>
               </div>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </div>
       
       {/* SCROLL INDICATOR */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30 z-10">
-        <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+        <m.div animate={{ y: [0, 6, 0] }} transition={{ duration: 2, repeat: Infinity }}>
           <ChevronDown className="w-5 h-5 text-accent" />
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

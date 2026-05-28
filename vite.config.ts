@@ -31,25 +31,14 @@ export default defineConfig(({ mode }) => ({
     minify: "esbuild",
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (!id.includes("node_modules")) return;
-          if (id.includes("react-dom") || id.includes("scheduler") || id.includes("react/")) return "react";
-          if (id.includes("react-router")) return "router";
-          if (id.includes("framer-motion")) return "motion";
-          if (id.includes("@radix-ui")) return "radix";
-          if (id.includes("lucide-react")) return "icons";
-          if (id.includes("@tanstack")) return "query";
-          if (id.includes("recharts") || id.includes("d3-")) return "charts";
-          return "vendor";
-        },
-        // Optimize chunk file names for browser caching
+        // REMOVED manualChunks completely to fix the "createContext of undefined" crash
         chunkFileNames: "assets/[name]-[hash].js",
         entryFileNames: "assets/[name]-[hash].js",
       },
     },
   },
 
-  // Optimize dependencies pre-bundling
+  // Keep this to help Vite pre-bundle smoothly
   optimizeDeps: {
     include: [
       "react",

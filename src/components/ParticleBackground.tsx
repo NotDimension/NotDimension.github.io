@@ -8,8 +8,15 @@ import React from 'react';
  * - Max performance: Uses hardware-accelerated CSS keyframe animations instead of JS loops.
  */
 const Background: React.FC = () => {
-  // Generates 30 random particle styles for a natural, organic distribution
-  const particles = Array.from({ length: 30 }).map((_, i) => {
+  // Scale particle count to device capabilities for weak phones/laptops
+  const hc = typeof navigator !== "undefined" ? navigator.hardwareConcurrency || 4 : 4;
+  // @ts-expect-error deviceMemory is non-standard
+  const mem = typeof navigator !== "undefined" ? navigator.deviceMemory || 4 : 4;
+  const isTouch = typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)").matches;
+  const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const baseCount = reduced ? 0 : Math.min(30, Math.max(8, Math.round((hc + mem) * (isTouch ? 1 : 1.5))));
+
+  const particles = Array.from({ length: baseCount }).map((_, i) => {
     const size = Math.random() * 3 + 2; // Size between 2px and 5px
     const left = Math.random() * 100;   // Starting horizontal placement (%)
     const delay = Math.random() * -20;  // Negative delay so they don't all spawn at once

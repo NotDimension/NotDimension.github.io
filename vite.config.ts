@@ -28,6 +28,13 @@ export default defineConfig(({ mode }) => ({
     cssCodeSplit: true,
     sourcemap: false,
     chunkSizeWarningLimit: 1000,
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: (id) => {
@@ -41,7 +48,20 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("recharts") || id.includes("d3-")) return "charts";
           return "vendor";
         },
+        // Optimize chunk file names for browser caching
+        chunkFileNames: "assets/[name]-[hash].js",
+        entryFileNames: "assets/[name]-[hash].js",
       },
     },
+  },
+
+  // Optimize dependencies pre-bundling
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "framer-motion",
+    ],
   },
 }));

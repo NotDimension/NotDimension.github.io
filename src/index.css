@@ -1,0 +1,363 @@
+/* Fonts preloaded in index.html for better performance */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   ALL THEMING FOR THE SITE LIVES IN THIS FILE.
+   Edit the CSS variables in :root and .dark below to restyle
+   the entire site. Every color, glow, gradient, shadow, and
+   hero overlay routes through these tokens.
+   ========================================================= */
+
+@layer base {
+  :root {
+    /* ===== CORE PALETTE — LIGHT MODE (Black & White) ===== */
+    --background: 0 0% 97%;               /* Crisp clean near-white */
+    --foreground: 0 0% 5%;                /* Pure near-black for max contrast */
+    --card: 0 0% 100%;                    /* Pure white cards */
+    --card-foreground: 0 0% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5%;
+    --primary: 0 0% 15%;                  /* Deep black */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 92%;                /* Light gray framing */
+    --secondary-foreground: 0 0% 5%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 25%;         /* High contrast dark gray body text */
+    --accent: 0 0% 10%;                   /* Near-black accent */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 0% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 80%;                   /* Gray borders */
+    --input: 0 0% 80%;
+    --ring: 0 0% 15%;
+    --radius: 0.5rem;
+
+    /* ===== SURFACES ===== */
+    --surface-card-bg: hsl(var(--card) / 1);
+    --surface-card-border: hsl(0 0% 85%);
+    --surface-card-border-hover: hsl(0 0% 50%);
+    --surface-card-shadow:
+      0 1px 2px hsl(0 0% 0% / 0.1),
+      0 4px 8px hsl(0 0% 0% / 0.08),
+      0 12px 24px -8px hsl(0 0% 0% / 0.12);
+    --surface-card-shadow-hover:
+      0 2px 4px hsl(0 0% 0% / 0.14),
+      0 8px 16px hsl(0 0% 0% / 0.12),
+      0 24px 48px -12px hsl(0 0% 0% / 0.22);
+
+    /* HERO OVERLAY */
+    --hero-overlay:
+      radial-gradient(ellipse at 50% 30%, hsl(0 0% 0% / 0.08) 0%, transparent 55%),
+      linear-gradient(to bottom,
+        hsl(var(--background) / 0.15) 0%,
+        hsl(var(--background) / 0.75) 60%,
+        hsl(var(--background)) 100%);
+    --hero-green-halo: radial-gradient(ellipse at 50% 25%, hsl(0 0% 0% / 0.06) 0%, transparent 65%);
+
+    /* GLOWS / SHADOWS */
+    --gradient-card: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(0 0% 97% / 0.5) 100%);
+    --shadow-soft: 0 20px 40px -15px hsl(0 0% 0% / 0.15);
+    --shadow-glow: 0 0 18px hsl(0 0% 0% / 0.15), 0 0 0 1px hsl(var(--border));
+    --glow-ring: 0 0 0 3px hsl(0 0% 0% / 0.2);
+    --glow-avatar: 0 0 0 1px hsl(0 0% 70%), 0 12px 24px -8px hsl(0 0% 0% / 0.15);
+    --glow-avatar-hover: 0 0 0 2px hsl(0 0% 40%), 0 0 30px hsl(0 0% 0% / 0.2), 0 16px 32px -8px hsl(0 0% 0% / 0.2);
+
+    /* STATUS */
+    --status-online: 0 0% 40%;
+
+    /* NAME LETTER */
+    --name-text-color: hsl(var(--foreground));
+    --name-hover-color: hsl(0 0% 30%);
+
+    /* PARTICLES */
+    --particle-color: hsl(0 0% 0% / 0.3);
+    --particle-tint-a: hsl(0 0% 0% / 0.08);
+    --particle-tint-b: transparent;
+
+    --transition-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .dark {
+    /* ===== CORE PALETTE — DARK (Black & White) ===== */
+    --background: 0 0% 4%;            
+    --foreground: 0 0% 95%;           
+    --card: 0 0% 7%;                  
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 90%;                  /* Light gray primary */
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 12%;            
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 85%;                    /* Light gray accent */
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 0% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 85%;
+    --radius: 0.75rem;
+
+    /* SURFACES */
+    --surface-card-bg: hsl(var(--card) / 1);
+    --surface-card-border: hsl(0 0% 20%);
+    --surface-card-border-hover: hsl(0 0% 45%);
+    --surface-card-shadow:
+      0 1px 2px hsl(0 0% 0% / 0.5),
+      0 4px 12px hsl(0 0% 0% / 0.55),
+      0 12px 30px -10px hsl(0 0% 0% / 0.7);
+    --surface-card-shadow-hover:
+      0 2px 4px hsl(0 0% 0% / 0.6),
+      0 8px 20px hsl(0 0% 0% / 0.65),
+      0 20px 40px -10px hsl(0 0% 0% / 0.8);
+
+    --hero-overlay:
+      radial-gradient(ellipse at 50% 35%, hsl(0 0% 100% / 0.05) 0%, transparent 55%),
+      linear-gradient(to bottom,
+        hsl(var(--background) / 0.55) 0%,
+        hsl(var(--background) / 0.82) 55%,
+        hsl(var(--background)) 100%);
+    --hero-green-halo: radial-gradient(ellipse at 50% 30%, hsl(0 0% 100% / 0.04) 0%, transparent 65%);
+
+    --gradient-card: linear-gradient(135deg, hsl(var(--card) / 1) 0%, hsl(0 0% 4% / 1) 100%);
+    --shadow-soft: 0 10px 30px -10px hsl(0 0% 0% / 0.7);
+    --shadow-glow: 0 0 20px hsl(0 0% 100% / 0.1);
+    --glow-ring: 0 0 16px hsl(0 0% 100% / 0.15);
+    --glow-avatar: 0 0 30px hsl(0 0% 100% / 0.1);
+    --glow-avatar-hover: 0 0 40px hsl(0 0% 100% / 0.2);
+
+    --status-online: 0 0% 60%;
+
+    --name-text-color: hsl(var(--foreground));
+    --name-hover-color: hsl(0 0% 70%);
+
+    --particle-color: hsl(0 0% 100% / 0.3);
+    --particle-tint-a: hsl(0 0% 100% / 0.06);
+    --particle-tint-b: hsl(0 0% 100% / 0.02);
+  }
+
+  html, body { transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
+  body {
+    background-color: hsl(var(--background));
+    @apply text-foreground font-sans antialiased min-h-screen overflow-x-hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* =========================================================
+   HERO BACKGROUND 
+   ========================================================= */
+.hero-bg {
+  position: relative;
+  isolation: isolate;
+  background-color: hsl(var(--background));
+}
+
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/bg-landscape.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
+  animation: heroDrift 30s ease-in-out infinite alternate;
+}
+
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hero-overlay);
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes heroDrift {
+  0%   { transform: scale(1.01) translate(0, 0); }
+  100% { transform: scale(1.04) translate(-0.8%, -0.4%); }
+}
+
+/* HERO GREEN HALO */
+.hero-green-halo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: var(--hero-green-halo);
+}
+
+/* =========================================================
+   GLASS / CARD STYLES
+   ========================================================= */
+.glass-card,
+.role-card {
+  position: relative;
+  background: var(--surface-card-bg);
+  border: 1px solid var(--surface-card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--surface-card-shadow);
+  transition: transform 0.4s var(--transition-smooth), border-color 0.4s ease, box-shadow 0.4s ease;
+  will-change: transform;
+}
+
+.glass-card:hover,
+.role-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--surface-card-border-hover);
+  box-shadow: var(--surface-card-shadow-hover);
+}
+
+/* =========================================================
+   SECTION HEADING
+   ========================================================= */
+.section-heading {
+  color: hsl(var(--primary));
+  transition: all 0.3s var(--transition-smooth);
+  text-shadow: 0 0 12px hsl(0 0% 0% / 0.15);
+  display: inline-block;
+}
+
+.section-heading:hover {
+  color: hsl(0 0% 30%);
+  text-shadow: 0 0 20px hsl(0 0% 0% / 0.2);
+  transform: scale(1.05);
+}
+
+/* =========================================================
+   CAT COMPANION
+   ========================================================= */
+.cat-container {
+  width: 64px;
+  height: 64px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  image-rendering: pixelated;
+  z-index: 9999;
+  will-change: transform;
+}
+
+.cat-sprite {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* =========================================================
+   TEXT / GLOW UTILITIES
+   ========================================================= */
+.glow-text {
+  text-shadow: var(--shadow-glow);
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, hsl(var(--foreground)) 0%, hsl(var(--accent)) 50%, hsl(var(--foreground)) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmerText 6s linear infinite;
+}
+
+@keyframes shimmerText { to { background-position: 200% center; } }
+
+/* NOISE OVERLAY */
+.noise-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' result='noise'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='noise' scale='1'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 50;
+  mix-blend-mode: overlay;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 0% / 0.25);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover { background: hsl(0 0% 0% / 0.5); }
+
+/* =========================================================
+   NAME LETTER (theme-aware, hover color)
+   ========================================================= */
+.name-letter {
+  color: var(--name-text-color);
+  transition: color 200ms var(--transition-smooth);
+}
+.name-letter:hover {
+  color: var(--name-hover-color);
+}
+
+/* =========================================================
+   TIMELINE (About page)
+   ========================================================= */
+.timeline-line {
+  background: linear-gradient(to bottom, hsl(var(--accent) / 0.5), hsl(var(--accent) / 0.1));
+}
+.timeline-dot {
+  background-color: hsl(var(--accent));
+  box-shadow: 0 0 8px hsl(var(--accent) / 0.5);
+}
+
+/* =========================================================
+   UTILITY: page-container
+   ========================================================= */
+.page-container {
+  min-height: 100vh;
+}
+
+/* =========================================================
+   UTILITY: section-divider
+   ========================================================= */
+.section-divider {
+  position: relative;
+}
+
+.section-divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 1px;
+  background: hsl(0 0% 0% / 0.15);
+}
+
+/* =========================================================
+   STATUS INDICATOR
+   ========================================================= */
+.status-online {
+  background-color: hsl(var(--status-online));
+  box-shadow: 0 0 14px hsl(var(--status-online) / 0.5);
+}
+
+/* =========================================================
+   SOCIAL ICONS — monochrome, theme-aware
+   ========================================================= */
+.social-icon {
+  transition: filter 0.4s ease, opacity 0.3s ease;
+  filter: brightness(0) saturate(100%);
+}
+.dark .social-icon {
+  filter: invert(1);
+}

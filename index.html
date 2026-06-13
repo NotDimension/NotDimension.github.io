@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title>NotDimension | Portfolio</title>
+    <meta name="description" content="Minecraft server developer specializing in plugin configuration, staff management, and community engagement.">
+    <meta name="author" content="NotDimension" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://notdimension.lovable.app/" />
+    <meta property="og:site_name" content="NotDimension" />
+    <meta property="og:title" content="NotDimension | Portfolio">
+    <meta property="og:description" content="Minecraft server developer specializing in plugin configuration, staff management, and community engagement.">
+    <meta property="og:image" content="https://notdimension.lovable.app/og-image.png?v=6">
+    <meta property="og:image:secure_url" content="https://notdimension.lovable.app/og-image.png?v=6">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1048">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="NotDimension — Experienced Admin & Developer">
+    <link rel="canonical" href="https://notdimension.lovable.app/" />
+    <meta name="theme-color" content="#6b7280">
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NotDimension | Portfolio">
+    <meta name="twitter:description" content="Minecraft server developer specializing in plugin configuration, staff management, and community engagement.">
+    <meta name="twitter:image" content="https://notdimension.lovable.app/og-image.png?v=6">
+    <meta name="twitter:image:alt" content="NotDimension — Experienced Admin & Developer">
+    <meta name="twitter:url" content="https://notdimension.lovable.app/" />
+
+    <!-- CRITICAL PATH OPTIMIZATION: Preconnect for critical third-party resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.discordapp.com" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.simpleicons.org" />
+    
+    <!-- Font: Use font-display=swap to prevent FOUT (Flash of Unstyled Text) -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'" />
+    
+    <!-- CRITICAL IMAGE PRELOADS: Only preload the most critical images for above-the-fold content -->
+    <link rel="preload" as="image" href="/bg-landscape.jpg" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/profile.png" fetchpriority="high" />
+
+    <!-- OPTIMIZE FAVICON: Use svg+xml for better performance -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3'%3E%3C/polyline%3E%3Cline x1='12' y1='12' x2='20' y2='7.5'%3E%3C/line%3E%3Cline x1='12' y1='12' x2='12' y2='21'%3E%3C/line%3E%3Cline x1='12' y1='12' x2='4' y2='7.5'%3E%3C/line%3E%3C/svg%3E" />
+
+    <!-- OPTIONAL: Add preload for critical JavaScript chunks if you identify them -->
+    <!-- <link rel="modulepreload" href="/assets/react-[hash].js"> -->
+
+    <script>
+      function updateTitle() {
+        const page = window.location.hash.replace("#/", "");
+        const titles = {
+          "": "Portfolio",
+          "projects": "Projects",
+          "contact": "Contact",
+          "about": "About Me"
+        };
+        document.title = "NotDimension | " + (titles[page] || "Portfolio");
+      }
+
+      window.addEventListener("hashchange", updateTitle);
+      window.addEventListener("load", updateTitle);
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
